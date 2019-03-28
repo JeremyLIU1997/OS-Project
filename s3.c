@@ -54,12 +54,8 @@ int main(int argc, char *argv[]) {
 				event_counter++;
 			}
 			
-			for (int i = 0; i < event_counter; ++i)
-			{
 
-				print_event(i);
-			}
-
+			create_scheduler(GREEDY_ALG);
 			//sleep(3);
 			/* call schedulers... */
 
