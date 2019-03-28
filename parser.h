@@ -1,4 +1,7 @@
 
+#ifndef PARSER_H
+#define PARSER_H
+
 // macros
 #define ASSIGNMENT_TYPE 0
 #define PROJECT_TYPE 1
@@ -30,3 +33,5 @@ extern int period_end_time;
 // prototypes
 void parse();
 void print_event();
+
+#endif
