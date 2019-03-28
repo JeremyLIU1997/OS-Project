@@ -18,7 +18,6 @@
 // macros
 
 // global variables
-struct Event* sorted_ar[1000];
 
 // prototypes
 int compareTo(const void* a, const void* b) {
@@ -47,21 +46,9 @@ void greedy() {
 		events[i].unit_benefit = benefit / events[i].duration;
 	}
 
-	for (int i = 0; i < 1000; ++i)
-		sorted_ar[i] = events + i;
-
 	qsort(events, event_counter, sizeof(events[0]), compareTo);
 
-	printf("------------------------\n");
-	for (int i = 0; i < event_counter; ++i)
-	{
-		print_event(i);
-	}
-	printf("~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-	for (int i = 0; i < event_counter; ++i)
-	{
-		printf("%s\n", sorted_ar[i]->name);
-	}
+	
 
 
 }
