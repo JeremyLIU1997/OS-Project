@@ -23,6 +23,10 @@
 struct event events[1000]; // support at most 1000 events
 int event_counter = 0;
 char command[1000][100];
+int period_start_date;
+int period_end_date;
+int period_start_time;
+int period_start_time;
 
 int split(char* input, char* output, int* start) {
 	char* ptr = output;
@@ -31,7 +35,7 @@ int split(char* input, char* output, int* start) {
 	*ptr = '\0';
 	if (*(input + *start -1) == '\n')
 		return -1;
-	else 
+	else
 		return 0;
 }
 
@@ -44,10 +48,20 @@ void print_event(int i) {
 	printf("Duration: %d\n",events[i].duration);
 }
 
+void parse_date(char* temp, int* dest) {
+	char date_temp[9]; int end=0;
+	for (int j = 0; j < strlen(temp); ++j)
+		{
+			if (temp[j] == '-')
+				continue;
+			date_temp[end++] = temp[j];
+		}
+	date_temp[end] = 0;
+	*dest = (int)atoi(date_temp);
+} 
+
 // functions
 void parse() {
-	char buf[100];
-
 	/*
 	strcpy(command[0],"addPeriod 2019-04-08 2019-04-21 19:00 23:00");
 	strcpy(command[1],"addAssignment COMP2432A1 2019-04-18 12");
@@ -57,17 +71,30 @@ void parse() {
 	strcpy(command[5],"addBatch S3_tasks_00.dat");
 	*/
 
-
 	printf("Start!\n");
 	for (int i = 0; i < event_counter; ++i)
 	{
+		printf("#%d\n", i);
 		int a = 0;
 		int* start = &a;
 		char temp[100];
 		split(command[i],temp,start);
 		(*start)++;
 		if (strcmp(temp,"addPeriod") == 0) {
-
+			split(command[i],temp,start);
+			parse_date(temp,&(period_start_date));
+			(*start)++;
+			split(command[i],temp,start);
+			parse_date(temp,&(period_end_date));
+			(*start)++;
+			// handle time
+			split(command[i],temp,start);
+			period_start_time = (temp[0] - '0') * 10 + (temp[1] - '0');
+			(*start)++;
+			// handle time
+			split(command[i],temp,start);
+			period_end_time = (temp[0] - '0') * 10 + (temp[1] - '0');
+			(*start)++;
 		}
 		else if (strcmp(temp,"addAssignment") == 0 || strcmp(temp,"addProject") == 0) {
 			if (strcmp(temp,"addAssignment") == 0)
@@ -80,17 +107,9 @@ void parse() {
 			(*start)++;
 			// handle date
 			split(command[i],temp,start);
-			char date_temp[8]; int end=0;
-			for (int j = 0; j < strlen(temp); ++j)
-			{
-				if (temp[j] == '-')
-					continue;
-				date_temp[end++] = temp[j];
-			}
-			date_temp[end] = '\0';
-			events[i].date = (int)atoi(date_temp);
+			parse_date(temp,&(events[i].date));
 			(*start)++;
-			// handle time
+			// handle duration
 			split(command[i],temp,start);
 			events[i].duration = (int)atoi(temp);
 		}
@@ -105,24 +124,20 @@ void parse() {
 			(*start)++;
 			// handle date
 			split(command[i],temp,start);
-			char date_temp[8]; int end=0;
-			for (int j = 0; j < strlen(temp); ++j)
-			{
-				if (temp[j] == '-')
-					continue;
-				date_temp[end++] = temp[j];
-			}
-			date_temp[end] = '\0';
-			events[i].date = (int)atoi(date_temp);
+			printf("Before\n");
+			printf("%s\n", temp);
+			parse_date(temp,&(events[i].date));
+			printf("After\n");
 			(*start)++;
 			// handle time
 			split(command[i],temp,start);
 			events[i].time = (temp[0] - '0') * 10 + (temp[1] - '0');
 			(*start)++;
-			// handle time
+			// handle duration
 			split(command[i],temp,start);
 			events[i].duration = (int)atoi(temp);
 		}
 	}
+
 }
 

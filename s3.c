@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
 				if (strcmp(command[event_counter],"RUN\n") == 0) {
 					printf("RUN!!!\n");
 					parse();
+					printf("~~~~~~~~~~\n");
 					break;
 				}
 				event_counter++;
@@ -56,6 +57,7 @@ int main(int argc, char *argv[]) {
 			
 			for (int i = 0; i < event_counter; ++i)
 			{
+
 				print_event(i);
 			}
 
@@ -116,7 +118,7 @@ void toChild(int fd_toC[][2], char *instr) {
 	for (int i = 0; i < CHILD_NUM; i++) {
 		write(fd_toC[i][1], instr, strlen(instr));
 	}
-	printf("<Parent> message passed to all child\n");//to be deleted
+	//printf("<Parent> message passed to all child\n");//to be deleted
 }
 
 
