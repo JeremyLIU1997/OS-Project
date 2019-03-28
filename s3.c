@@ -11,6 +11,7 @@
 
 /* prototype */
 void getInput(char *instr);
+void cmdToChild(int fd_toC[][2], char *instr);
 void toChild(int fd_toC[][2], char *instr);
 void test(int fd_toC[][2], int i);//to be deleted
 
@@ -20,7 +21,7 @@ int fd_toC[CHILD_NUM][2], fd_toP[CHILD_NUM][2];
 /* main */
 int main(int argc, char *argv[]) {
 	int pid, i;
-
+	
 	// create pipes
 	for (i = 0; i < CHILD_NUM; i++) {
 		if (pipe(fd_toC[i]) < 0 || pipe(fd_toP[i]) < 0) {
@@ -41,7 +42,6 @@ int main(int argc, char *argv[]) {
 			close(fd_toC[i][1]);
 			close(fd_toP[i][0]);
 			
-			
 			int n=0;
 			while ((n = read(fd_toC[i][0],command[event_counter],BUF_SIZE)) > 0) {
 				command[event_counter][n] = '\n';
@@ -56,11 +56,13 @@ int main(int argc, char *argv[]) {
 			
 
 			create_scheduler(GREEDY_ALG);
+
+			
 			//sleep(3);
 			/* call schedulers... */
 
 			// just for testing: 
-			// test(fd_toC, i);//to be deleted
+			//test(fd_toC, i);//to be deleted
 
 
 
@@ -81,9 +83,10 @@ int main(int argc, char *argv[]) {
 
 		while (1) {
 			getInput(instr);
-			toChild(fd_toC, instr);
-
 			if (strcmp(instr, "exitS3") == 0) break;
+			
+			cmdToChild(fd_toC, instr);
+
 
 		}
 
@@ -108,13 +111,33 @@ void getInput(char *instr) {
 	getchar();
 }
 
-/* toChild function: pass input command to all children */
+/* cmdToChild function: pass all inputed command to children */
+void cmdToChild(int fd_toC[][2], char *instr) {
+	if (strncmp(instr, "addBatch", 8) != 0)
+		toChild(fd_toC, instr);
+	else { // if the command is "addBatch ...", read file
+		FILE *fp;
+		char *filename = (char*) malloc(strlen(instr)-9);
+		strcpy(filename, instr+9);
+		fp = fopen(filename, "r");
+		while(fscanf(fp, "%[^\n]\n", instr) != EOF) {
+		//while( fgets (instr, BUF_SIZE, fp) != NULL ) {
+			//printf("%s\n", instr);
+			toChild(fd_toC, instr);
+			sleep(1);
+		}
+		fclose(fp);
+	}
+}
+
+/* toChild function: pass a command to all children */
 void toChild(int fd_toC[][2], char *instr) {
 	for (int i = 0; i < CHILD_NUM; i++) {
 		write(fd_toC[i][1], instr, strlen(instr));
 	}
 	//printf("<Parent> message passed to all child\n");//to be deleted
 }
+
 
 
 //to be deleted
@@ -124,8 +147,8 @@ void test(int fd_toC[][2], int i) {
 
 	while ((n = read(fd_toC[i][0], buf, BUF_SIZE)) > 0) { // read from pipe
 		buf[n] = 0;
-		printf("number ofBytes read: %d\n", n);
-		printf("<Child %d> message [%s] received\n", getpid(), buf);
+		printf("<Child %d> message [%s] received of %d bytes\n", getpid(), buf, n);
 		if (buf[0] == 'e') break;
 	}
 }
+
