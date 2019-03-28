@@ -13,18 +13,16 @@
 #include <string.h>
 
 // my headers
-#include "main.h"
+#include "parser.h"
 
 // macros
 
 // prototypes
 
 //global variables
-
-// functions
-void parse() {
-
-}
+struct event events[1000]; // support at most 1000 events
+int event_counter = 0;
+char command[1000][100];
 
 int split(char* input, char* output, int* start) {
 	char* ptr = output;
@@ -37,26 +35,31 @@ int split(char* input, char* output, int* start) {
 		return 0;
 }
 
-void print_event() {
-
+void print_event(int i) {
+	printf("------------------\n");
+	printf("Event #%d\n", i);
+	printf("Name: %s\n",events[i].name);
+	printf("Date: %d\n",events[i].date);
+	printf("Time: %d\n",events[i].time);
+	printf("Duration: %d\n",events[i].duration);
 }
 
-struct event events[1000]; // support at most 1000 events
-int event_counter = 0;
-
-int main(int argc, char* argv[]) {
+// functions
+void parse() {
 	char buf[100];
-	char command[6][100];
 
+	/*
 	strcpy(command[0],"addPeriod 2019-04-08 2019-04-21 19:00 23:00");
 	strcpy(command[1],"addAssignment COMP2432A1 2019-04-18 12");
 	strcpy(command[2],"addProject COMP2422P1 2019-04-20 26");
 	strcpy(command[3],"addRevision COMP2000 2019-04-14 19:00 2");
 	strcpy(command[4],"addActivity Meeting 2019-04-18 20:00 2");
 	strcpy(command[5],"addBatch S3_tasks_00.dat");
+	*/
+
 
 	printf("Start!\n");
-	for (int i = 0; i < 6; ++i)
+	for (int i = 0; i < event_counter; ++i)
 	{
 		int a = 0;
 		int* start = &a;
@@ -122,3 +125,4 @@ int main(int argc, char* argv[]) {
 		}
 	}
 }
+

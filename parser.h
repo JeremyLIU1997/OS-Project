@@ -14,5 +14,12 @@ struct event {
 	int duration;
 };
 
-// functions
+
+// shared variables
+extern struct event events[1000]; // support at most 1000 events
+extern int event_counter;
+extern char command[1000][100];
+
+// prototypes
+void parse();
 void print_event();

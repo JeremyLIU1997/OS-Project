@@ -5,17 +5,20 @@
 #include <string.h>
 #include <regex.h>
 
-#define CHILD_NUM 2 //number of child
-#define BUF_SIZE 80 //length of a buf
+// our headers
+#include "parser.h"
+#include "s3.h"
 
 /* prototype */
 void getInput(char *instr);
 void toChild(int fd_toC[][2], char *instr);
 void test(int fd_toC[][2], int i);//to be deleted
 
+/* global variable */
+int fd_toC[CHILD_NUM][2], fd_toP[CHILD_NUM][2];
+
 /* main */
 int main(int argc, char *argv[]) {
-	int fd_toC[CHILD_NUM][2], fd_toP[CHILD_NUM][2];
 	int pid, i;
 
 	// create pipes
@@ -26,23 +29,41 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// create child precesses
+	// create child processes
 	for (i = 0; i < CHILD_NUM; i++) {
 		pid = fork();
 		if (pid < 0) {
 			printf("Fork failed\n");
 			exit(1);
 		}
+
 		if (pid == 0) { // child process
 			close(fd_toC[i][1]);
 			close(fd_toP[i][0]);
 			
 			
+			int n=0;
+			while ((n = read(fd_toC[i][0],command[event_counter],BUF_SIZE)) > 0) {
+				command[event_counter][n] = '\n';
+				command[event_counter][n+1] = 0;
+				if (strcmp(command[event_counter],"RUN\n") == 0) {
+					printf("RUN!!!\n");
+					parse();
+					break;
+				}
+				event_counter++;
+			}
+			
+			for (int i = 0; i < event_counter; ++i)
+			{
+				print_event(i);
+			}
+
 			//sleep(3);
 			/* call schedulers... */
 
-			//just for testing: 
-			test(fd_toC, i);//to be deleted
+			// just for testing: 
+			// test(fd_toC, i);//to be deleted
 
 
 
@@ -88,13 +109,12 @@ void getInput(char *instr) {
 	printf("Please enter:\n> ");
 	scanf("%[^\n]", instr); // scan the whole input line
 	getchar();
-
 }
 
 /* toChild function: pass input command to all children */
 void toChild(int fd_toC[][2], char *instr) {
 	for (int i = 0; i < CHILD_NUM; i++) {
-		write(fd_toC[i][1], instr, BUF_SIZE);
+		write(fd_toC[i][1], instr, strlen(instr));
 	}
 	printf("<Parent> message passed to all child\n");//to be deleted
 }
@@ -107,6 +127,7 @@ void test(int fd_toC[][2], int i) {
 
 	while ((n = read(fd_toC[i][0], buf, BUF_SIZE)) > 0) { // read from pipe
 		buf[n] = 0;
+		printf("number ofBytes read: %d\n", n);
 		printf("<Child %d> message [%s] received\n", getpid(), buf);
 		if (buf[0] == 'e') break;
 	}
