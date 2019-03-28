@@ -49,7 +49,6 @@ int main(int argc, char *argv[]) {
 				if (strcmp(command[event_counter],"RUN\n") == 0) {
 					printf("RUN!!!\n");
 					parse();
-					printf("~~~~~~~~~~\n");
 					break;
 				}
 				event_counter++;

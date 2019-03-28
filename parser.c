@@ -20,13 +20,13 @@
 // prototypes
 
 //global variables
-struct event events[1000]; // support at most 1000 events
+struct Event events[1000]; // support at most 1000 events
 int event_counter = 0;
 char command[1000][100];
 int period_start_date;
 int period_end_date;
 int period_start_time;
-int period_start_time;
+int period_end_time;
 
 int split(char* input, char* output, int* start) {
 	char* ptr = output;
@@ -74,7 +74,6 @@ void parse() {
 	printf("Start!\n");
 	for (int i = 0; i < event_counter; ++i)
 	{
-		printf("#%d\n", i);
 		int a = 0;
 		int* start = &a;
 		char temp[100];
