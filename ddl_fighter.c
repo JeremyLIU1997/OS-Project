@@ -16,6 +16,9 @@
 #include "ddl_fighter.h"
 
 // macros
+#define REJECT 0
+#define OVERLAP 1
+#define NO_OVERLAP 2
 
 // global variables
 int* schedule;
@@ -40,6 +43,7 @@ int get_date_difference(int date1, int date2) {
 	return (month2 - month1 - 1) * 30 + (30 - day1 + 1) + day2;
 }
 
+/* return the number of hours between two time POINTS */
 int get_total_hours(int date1, int date2, int time1, int time2) {
 	int hours = (get_date_difference(date1, date2) - 1) * HOUR_PER_DAY;
 	hours = hours - (time1- DAY_START) + time2 - DAY_START;
@@ -59,9 +63,9 @@ bool is_legal(struct Event e) {
 /* Get the corresponding hour in schedule[] the event ends */
 int get_ddl(struct Event e) {
 	if (e.type == ASSIGNMENT_TYPE || e.type == PROJECT_TYPE)
-		return get_total_hours(period_start_date,e.date,period_start_time,DAY_END);
+		return get_total_hours(period_start_date,e.date,period_start_time,DAY_END) - 1;
 	else
-		return get_total_hours(period_start_date,e.date,period_start_time,e.time + e.duration);
+		return get_total_hours(period_start_date,e.date,period_start_time,e.time + e.duration) - 1;
 }
 
 void init() {
@@ -99,13 +103,19 @@ scheduled, if the time slot happes
 to be available.
 */
 
-bool is_overlap(struct Event e) {
+int is_overlap(struct Event e) {
 	int ddl = get_ddl(e);
-	for (int i = 0; i < e.duration; --i) {
-		if (schedule[ddl-i] != 0)
-			return true;
+	bool overlap = false;
+	for (int i = 0; i < e.duration; ++i) {
+		if (schedule[ddl-i] == 0)
+			continue;
+		if (events[schedule[ddl-i]].type == ACTIVITY_TYPE || events[schedule[ddl-i]].type == REVISION_TYPE)
+			return REJECT;
+		overlap = true;
 	}
-	return false;
+	if (overlap == true)
+		return OVERLAP;
+	return NO_OVERLAP;
 }
 
 void swap(int* ar, int a, int b) {
@@ -129,8 +139,12 @@ bool has_enough_slot(int index, int duration) {
 }
 
 void print_schedule() {
-	for (int i = 0; i < total_hours; ++i)
+	int first_day_hours = period_start_time - DAY_START;
+	for (int i = 0; i < total_hours; ++i) {
+		if ((i + first_day_hours) % HOUR_PER_DAY == 0)
+			printf("|<%d> ", (i + first_day_hours) / HOUR_PER_DAY + 1);
 		printf("%d ", schedule[i]);
+	}
 	printf("\n");
 }
 
@@ -145,19 +159,25 @@ void print_result() {
 void fight_ddl() {
 	printf("Fighting Deadlines !!!\n");
 	init();
-	qsort(events+1, event_counter, sizeof(events[0]), compareTo);
 
+	qsort(events+1, event_counter, sizeof(events[0]), compareTo);
 	/* to delete */
 	for (int i = 1; i <= event_counter; ++i)
 		print_event(i);
 
-	print_result();
+	for (int i = 1; i <= event_counter; ++i)
+	{
+		printf("%d\n", get_ddl(events[i]));
+	}
+
+
 	printf("Deadline fighter scheduling...\n");
 	/* handle project and assignment first */
 	for (int i = 1; i <= event_counter; ++i)
 	{
 		if (events[i].type == ACTIVITY_TYPE || events[i].type == REVISION_TYPE)
 			continue;
+
 		int ddl = get_ddl(events[i]);
 		/* search forward from deadline for empty spot */
 		while(ddl >= 0 && events[i].rest_t > 0) {
@@ -173,15 +193,18 @@ void fight_ddl() {
 	{
 		if (events[i].type != REVISION_TYPE)
 			continue;
-
+		printf("i: %d\n", i);
 		/* if does not fit in time period, reject directly */
 		if (!is_legal(events[i])) {
 			rejected[number_of_reject++] = i;
 			continue;
 		}
+		printf("Is legal!\n");
 		/* test if overlap with other event occurs */
 		int ddl = get_ddl(events[i]);
-		if (is_overlap(events[i]) == true) {
+		int result = is_overlap(events[i]);
+		if (result == OVERLAP) {
+			printf("Solvable Overlap\n");
 			if (!has_enough_slot(ddl, events[i].duration))
 				rejected[number_of_reject++] = i;
 			else
@@ -200,8 +223,13 @@ void fight_ddl() {
 				}
 			}
 		}
+		else if (result == REJECT) {
+			rejected[number_of_reject++] = i;
+			printf("Rejected %d\n", i);
+		}
 		/* no overlap, just put the activity there */
 		else {
+			printf("Just put there!\n");
 			while ((events[i].rest_t)-- > 0)
 				schedule[ddl--] = i;
 		}
@@ -212,7 +240,6 @@ void fight_ddl() {
 	{
 		if (events[i].type != ACTIVITY_TYPE)
 			continue;
-
 		/* if does not fit in time period, reject directly */
 		if (!is_legal(events[i])) {
 			rejected[number_of_reject++] = i;
@@ -220,7 +247,8 @@ void fight_ddl() {
 		}
 		/* test if overlap with other event occurs */
 		int ddl = get_ddl(events[i]);
-		if (is_overlap(events[i]) == true) {
+		int result = is_overlap(events[i]);
+		if (result == OVERLAP) {
 			if (!has_enough_slot(ddl, events[i].duration))
 				rejected[number_of_reject++] = i;
 			else
@@ -239,6 +267,10 @@ void fight_ddl() {
 				}
 			}
 		}
+		else if (result == REJECT) {
+			rejected[number_of_reject++] = i;
+			printf("Rejected %d\n", i);
+		}
 		/* no overlap, just put the activity there */
 		else {
 			while ((events[i].rest_t)-- > 0)
@@ -246,15 +278,15 @@ void fight_ddl() {
 		}
 	}
 	
-	printf("\nScheduling Complete!\n");
-
 	print_result();
 	free(schedule);
+	printf("\nScheduling Complete!\n");
+	
 
 }
-/*
 
+/*
 int main() {
-	get_total_hours(0,0,0,0);
+	printf("%d\n", get_total_hours(20190413,20190415,19,22));
 }
 */
