@@ -28,10 +28,13 @@ int compareTo(const void* a, const void* b) {
 }
 
 void init() {
-	/* Initialize Schedule */
 	for (int i = 1; i <= event_counter; ++i) {
 		schedule[i] = -1;
 		events[i].rest_t = events[i].duration;
+		if (events[i].type == PROJECT_TYPE || events[i].type == ASSIGNMENT_TYPE)
+			events[i].ddl = (events[i].date + 1 - period_start_date) * HOUR_PER_DAY - period_start_time;
+		else
+			events[i].ddl = (events[i].date - period_start_date) * HOUR_PER_DAY - period_start_time + events[i].time;
 	}
 }
 

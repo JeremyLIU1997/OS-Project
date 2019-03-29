@@ -33,7 +33,7 @@ Each level up add 3
 #define REVISION_BASE 15
 #define ACTIVITY_BASE 5
 #define LEVEL_UP_POINT 3
-#define HOUR_PER_DAY 8
+#define HOUR_PER_DAY 24
 
 // structs
 struct Event {
@@ -42,6 +42,7 @@ struct Event {
 	char name[30];
 	int date;
 	int time;
+	int ddl;
 	int duration;
 	int rest_t; // the remaining hours
 	float percent; // -1 represents in valid
