@@ -44,11 +44,10 @@ int main(int argc, char *argv[]) {
 			
 			int n=0;
 			while ((n = read(fd_toC[i][0],command[event_counter],BUF_SIZE)) > 0) {
-				write(fd_toP[i][0],"OK\0",3); /* ACK message */
+				write(fd_toP[i][1],"O",1); /* ACK message */
 				command[event_counter][n] = '\n';
 				command[event_counter][n+1] = 0;
-				//printf("%s", command[event_counter]);
-				if (strcmp(command[event_counter],"RUN\n") == 0) {
+				if (strcmp(command[event_counter],"run\n") == 0) {
 					printf("RUN!!!\n");
 					parse();
 					break;
@@ -114,13 +113,16 @@ void getInput(char *instr) {
 void sync() {
 	char temp[10];
 	for (int i = 0; i < CHILD_NUM; ++i)
-		read(fd_toP[i][1],temp,9);
+		read(fd_toP[i][0],temp,1);
 }
 
 /* cmdToChild function: pass all inputed command to children */
 void cmdToChild(int fd_toC[][2], char *instr) {
-	if (strncmp(instr, "addBatch", 8) != 0)
+	if (strncmp(instr, "addBatch", 8) != 0) {
 		toChild(fd_toC, instr);
+		sync();
+	}
+
 	else { // if the command is "addBatch ...", read file
 		FILE *fp;
 		char *filename = (char*) malloc(strlen(instr)-9+1);
@@ -129,7 +131,6 @@ void cmdToChild(int fd_toC[][2], char *instr) {
 
 		while(fscanf(fp, "%[^\n]\n", instr) != EOF) {
 		//while( fgets (instr, BUF_SIZE, fp) != NULL ) {
-			printf("%s", instr);
 			toChild(fd_toC, instr);
 			int i = 0;
 			sync();
@@ -144,7 +145,6 @@ void toChild(int fd_toC[][2], char *instr) {
 	for (int i = 0; i < CHILD_NUM; i++) {
 		write(fd_toC[i][1], instr, strlen(instr));
 	}
-	sync();
 	//printf("<Parent> message passed to all child\n");//to be deleted
 }
 

@@ -9,7 +9,7 @@
 #define ACTIVITY_TYPE 3
 #define GREEDY_ALG 0
 
-#include "greedy.h"
+#include "ddl_fighter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +33,9 @@ Each level up add 3
 #define REVISION_BASE 15
 #define ACTIVITY_BASE 5
 #define LEVEL_UP_POINT 3
-#define HOUR_PER_DAY 24
+#define DAY_START 19
+#define DAY_END 23
+#define HOUR_PER_DAY (DAY_END - DAY_START)
 
 // structs
 struct Event {

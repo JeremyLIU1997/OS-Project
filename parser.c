@@ -48,7 +48,9 @@ void print_event(int i) {
 	printf("Time: %d\n",events[i].time);
 	printf("Duration: %d\n",events[i].duration);
 	printf("Unit_Benefit: %f\n",events[i].unit_benefit);
+	printf("------------------\n");
 }
+
 
 void parse_date(char* temp, int* dest) {
 	char date_temp[9]; int end=0;
@@ -62,23 +64,10 @@ void parse_date(char* temp, int* dest) {
 	*dest = (int)atoi(date_temp);
 } 
 
+
+
 // functions
 void parse() {
-	/*
-	strcpy(command[0],"addPeriod 2019-04-08 2019-04-21 19:00 23:00");
-	strcpy(command[1],"addAssignment COMP2432A1 2019-04-18 12");
-	strcpy(command[2],"addProject COMP2422P1 2019-04-20 26");
-	strcpy(command[3],"addRevision COMP2000 2019-04-14 19:00 2");
-	strcpy(command[4],"addActivity Meeting 2019-04-18 20:00 2");
-	strcpy(command[5],"addBatch S3_tasks_00.dat");
-
-	addPeriod 2019-04-08 2019-04-21 19:00 23:00
-	addAssignment COMP2432A1 2019-04-18 12
-	addProject COMP2422P1 2019-04-20 26
-	addRevision COMP2000 2019-04-14 19:00 2
-	addActivity Meeting 2019-04-18 20:00 2
-	addBatch S3_tasks_00.dat
-	*/
 
 	printf("Start!\n");
 	event_counter--;
@@ -127,6 +116,7 @@ void parse() {
 			// handle duration
 			split(command[i],temp,start);
 			events[i].duration = (int)atoi(temp);
+			events[i].time = DAY_END;
 		}
 		else if (strcmp(temp,"addRevision") == 0 || strcmp(temp,"addActivity") == 0) {
 			if (strcmp(temp,"addRevision") == 0)
@@ -159,7 +149,7 @@ void create_scheduler(int option) {
 
 	if (pid == 0) {
 		if (option == GREEDY_ALG) {
-			greedy();
+			fight_ddl();
 		}
 	}
 
