@@ -81,14 +81,20 @@ void parse() {
 	*/
 
 	printf("Start!\n");
-	for (int i = 0; i < event_counter; ++i)
+	event_counter--;
+	for (int i = 0; i <= event_counter; ++i)
 	{
 		int a = 0;
 		int* start = &a;
 		char temp[100];
 		split(command[i],temp,start);
 		(*start)++;
-		if (strcmp(temp,"addPeriod") == 0) {
+		if (i == 0) {
+
+			if (!(strcmp(temp,"addPeriod") == 0)) {
+				printf("Must add period first. Exit.\n");
+				exit(1);
+			}
 			split(command[i],temp,start);
 			parse_date(temp,&(period_start_date));
 			(*start)++;
@@ -104,7 +110,8 @@ void parse() {
 			period_end_time = (temp[0] - '0') * 10 + (temp[1] - '0');
 			(*start)++;
 		}
-		else if (strcmp(temp,"addAssignment") == 0 || strcmp(temp,"addProject") == 0) {
+		
+		if (strcmp(temp,"addAssignment") == 0 || strcmp(temp,"addProject") == 0) {
 			if (strcmp(temp,"addAssignment") == 0)
 				events[i].type = ASSIGNMENT_TYPE;
 			else
@@ -154,7 +161,6 @@ void create_scheduler(int option) {
 		if (option == GREEDY_ALG) {
 			greedy();
 		}
-
 	}
 
 	wait(NULL);

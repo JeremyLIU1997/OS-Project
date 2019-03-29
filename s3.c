@@ -41,7 +41,6 @@ int main(int argc, char *argv[]) {
 			close(fd_toC[i][1]);
 			close(fd_toP[i][0]);
 			
-			
 			int n=0;
 			while ((n = read(fd_toC[i][0],command[event_counter],BUF_SIZE)) > 0) {
 				command[event_counter][n] = '\n';
@@ -54,7 +53,6 @@ int main(int argc, char *argv[]) {
 				event_counter++;
 			}
 			
-
 			create_scheduler(GREEDY_ALG);
 			//sleep(3);
 			/* call schedulers... */
