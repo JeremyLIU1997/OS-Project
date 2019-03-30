@@ -3,16 +3,13 @@
 #define PARSER_H
 
 // macros
-#define ASSIGNMENT_TYPE 0
-#define PROJECT_TYPE 1
+#define PROJECT_TYPE 0
+#define ASSIGNMENT_TYPE 1
 #define REVISION_TYPE 2
 #define ACTIVITY_TYPE 3
 #define DDL_FIGHTER 0
 #define RR 1
 #define PR 2
-
-
-#include "ddl_fighter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +18,6 @@
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <string.h>
-
 
 /*
 Project base point: 30
@@ -70,4 +66,9 @@ void print_event();
 void create_scheduler(int option);
 int parse_level(char* name);
 bool is_digit(char a);
+
+#include "ddl_fighter.h"
+#include "RR.h"
+#include "PR.h"
+
 #endif

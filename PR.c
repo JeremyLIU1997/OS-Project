@@ -1,20 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 
+#include "PR.h"
 // Priority: Project > Assignment > Revision > Activity
-struct Event {
-	char id[5];
-	int type; // 0: Project, 1: Assignment, 2: Revision, 3: Activity
-	char name[20];
-	int date; // format: YYYYMMDD
-	int time; // format: hh (0<=hh<=23), -1 represents invalid
-	int duration;
-	int rest_t; // the remaining hours
-	float percent; // -1 represents in valid
-	struct Event* next;
-};
+
 struct Event * Sort_By_Priority(struct Event* head, int length);
 void Priority(struct Event* head,  int start_date, int end_date, int start_time, int end_time){
     /*No exemption for this version*/

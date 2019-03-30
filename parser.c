@@ -5,8 +5,6 @@
 
 // my headers
 #include "parser.h"
-#include "RR.h"
-#include "pr.h"
 // macros
 
 // prototypes
@@ -152,7 +150,7 @@ void create_scheduler(int option) {
 		fight_ddl();
 	}
 	else if (option == RR) {
-		Round_Robin();
+		// Round_Robin();
 	}
 	else if (option == PR) {
 
