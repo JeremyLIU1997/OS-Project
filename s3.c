@@ -48,8 +48,11 @@ int main(int argc, char *argv[]) {
 			while ((n = read(fd_toC[i][0],str,BUF_SIZE)) > 0) {
 				str[n] = '\n'; str[n+1] = 0;
 				write(fd_toP[i][1],"O",1); /* ACK message */
-				if (strncmp(str,"run",3) == 0)
+				bool parsed = false;
+				if (strncmp(str,"run",3) == 0 && parsed == false) {
+					parsed = true;
 					parse();
+				}
 				if (strcmp(str,"run ddl\n") == 0) {
 					printf("Fighting Deadlines !!!\n");
 					create_scheduler(DDL_FIGHTER);
