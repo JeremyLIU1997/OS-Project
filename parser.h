@@ -48,6 +48,7 @@ struct Event {
 	int rest_t; // the remaining hours
 	float percent; // -1 represents in valid
 	float unit_benefit;
+	int status;
 	struct Event* next;
 };
 

@@ -43,6 +43,7 @@ void print_event(int i) {
 	printf("------------------\n");
 	printf("Event #%d\n", i);
 	printf("Name: %s\n",events[i].name);
+	printf("Type: %d\n",events[i].type);
 	printf("Date: %d\n",events[i].date);
 	printf("Time: %d\n",events[i].time);
 	printf("Duration: %d\n",events[i].duration);

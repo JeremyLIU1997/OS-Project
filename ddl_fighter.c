@@ -29,6 +29,9 @@ int number_of_reject = 0;
 // prototypes
 int get_ddl(struct Event e);
 void generate_summary();
+void generate_log();
+void generate_intermediate_timetable();
+void generate_report();
 
 int compareTo(const void* a, const void* b) {
 	struct Event* structA = (struct Event*) a;
@@ -73,6 +76,7 @@ int get_ddl(struct Event e) {
 void init() {
 	for (int i = 1; i <= event_counter; ++i)
 	{
+		events[i].status = ACCEPTED;
 		int level = parse_level(events[i].name);
 		float benefit = 0;
 		if (events[i].type == PROJECT_TYPE)
@@ -261,19 +265,52 @@ void fight_ddl() {
 				schedule[ddl--] = i;
 		}
 	}
+
+	for (int i = 0; i < number_of_reject; ++i)
+		events[rejected[i]].status = REJECTED;
 	
 	print_result();
 	generate_summary();
+	generate_log();
+	generate_intermediate_timetable();
+
 	free(schedule);
 
 	printf("\nScheduling Complete!\n");
 }
 
-void generate_report() {
-	FILE *report = fopen("./summary/ddl_fighter_report.txt", "w");
+void generate_log() {
+	char dict[2][20] = {"ACCEPTED","REJECTED"};
+	FILE *log = fopen("./summary/ddl_fighter_log.txt", "w");
+	fprintf(log,"***** Log - Deadline Fighter *****\n\n");
+	fprintf(log, "ID    Name                                               Status\n");
+	fprintf(log, "===============================================================\n");
+	char temp[100];
+	for (int i = 1; i <= event_counter; ++i) {
+		strcpy(temp,command[events[i].id]);
+		temp[strlen(temp)-1] = 0;
+		fprintf(log, "%d\t%s\t\t\t%s\n",events[i].id,temp,dict[events[i].status]);
+	}
+	fclose(log);
+}
 
-
-	fclose(report);
+void generate_intermediate_timetable() {
+	FILE *file = fopen("./summary/ddl_fighter_result.txt", "w");
+	int current_time = -1;
+	int current_date;
+	for (int i = 1; i <= event_counter; ++i)
+	{
+		print_event(i);
+	}
+	for (int i = 0; i < total_hours; ++i)
+	{
+		current_date = i / HOUR_PER_DAY + period_start_date;
+		current_time = (current_time+1) % HOUR_PER_DAY;
+		int index = schedule[i];
+		if (index == 0) continue;
+		fprintf(file, "%d %d %d %s %d\n", current_date, DAY_START + current_time,events[index].id,events[index].name,events[index].type);
+	}
+	fclose(file);
 }
 
 void generate_summary() {
