@@ -2,12 +2,7 @@
  * Author: DING Dashan 17082316d
  * Date: 2019/3/30
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include "parser.h"
+#include "PR.h"
 
 // Priority: Project > Assignment > Revision > Activity
 
