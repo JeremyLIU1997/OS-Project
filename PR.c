@@ -1,5 +1,14 @@
+/*
+ * Author: DING Dashan 17082316d
+ * Date: 2019/3/30
+ */
 
-#include "PR.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include "parser.h"
+
 // Priority: Project > Assignment > Revision > Activity
 
 struct Event * Sort_By_Priority(struct Event* head, int length);
@@ -12,12 +21,12 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
         if (cur->type == 2 || cur->type == 3){
             if (cur_time == cur->date*100 + cur->time) { // it's the right date and time
                 if (end_time - cur_time < cur->duration) { // the Revision or Activity can not be finished in one go at the current day
-					printf("Event (id: %s, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
+					printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
 				} else {
 					cur_time = cur_time + cur->duration;
 				}
             } else {
-				printf("Event (id: %s, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
+				printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
 			}
 			if (cur->next == NULL) {
                 cur = NULL;
@@ -33,16 +42,15 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
             int rem_date = end_date-cur_date;
             int rem_time = rem_date*(start_time - end_time) + (cur_date+1)*100 - cur_time;
             int time_to_ddl = (cur->date - cur_date)*(start_time - end_time) + (cur_date+1)*100 - cur_time;
-            printf("curdate: %d, remdate: %d\n", cur_date, rem_date);
             if (rem_time >= cur->rest_t){
                 if (time_to_ddl >= cur->rest_t) {
                     cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
-                    printf("Event (id: %s, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
+                    printf("Event (id: %d, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
                     // the Event has been completed
                 }
                 else{
                     cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
-                    printf("Event (id: %s, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
+                    printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
                     cur_time = (cur->date+1) * 100;
                 }
                 if (cur->next==NULL) { // the Event is the last one
@@ -53,7 +61,7 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
 				}
             }
 			else { // it fails to finish
-                printf("Event (id: %s, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
+                printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
 				if (cur->next==NULL) { // the Event is the last one
 					cur = NULL;
 					return;
@@ -65,7 +73,7 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
     }
      /* Clear the remaining rejected events */
 	while (cur!=NULL) {
-		printf("Event (id: %s, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
+		printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
 		cur = cur->next;
 	}
 
@@ -96,10 +104,10 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
 }
 int main(){
     struct Event* head = NULL;
-	struct Event a1 = {.id="0001", .type=1, .name="COMP2432A1", .date=20190418, .time=-1, .duration=12, .rest_t=12, .percent=0.0, .next=NULL};
-	struct Event a2 = {.id="0002", .type=0, .name="COMP2422P1", .date=20190420, .time=-1, .duration=26, .rest_t=26, .percent=0.0, .next=NULL};
-	struct Event a3 = {.id="0003", .type=2, .name="COMP2000",   .date=20190414, .time=19, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
-	struct Event a4 = {.id="0004", .type=3, .name="Meeting",    .date=20190418, .time=20, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
+	struct Event a1 = {.id=1, .type=1, .name="COMP2432A1", .date=20190418, .time=-1, .duration=12, .rest_t=12, .percent=0.0, .next=NULL};
+	struct Event a2 = {.id=2, .type=0, .name="COMP2422P1", .date=20190420, .time=-1, .duration=26, .rest_t=26, .percent=0.0, .next=NULL};
+	struct Event a3 = {.id=3, .type=2, .name="COMP2000",   .date=20190414, .time=19, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
+	struct Event a4 = {.id=4, .type=3, .name="Meeting",    .date=20190418, .time=20, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
 
     head = &a1;
 	a1.next = &a2;
@@ -107,8 +115,8 @@ int main(){
 	a3.next = &a4;
 	int length = 4;
 	head = Sort_By_Priority(head, length);
-	struct Event* cur = head;
-    /*for (int i = 0; i < 4; i++){
+	/*struct Event* cur = head;
+    for (int i = 0; i < 4; i++){
         printf("Event (id: %s, name: %s, type: %d)\n",cur->id, cur->name, cur->type);
         cur = cur->next;
     }*/
