@@ -193,18 +193,15 @@ void fight_ddl() {
 	{
 		if (events[i].type != REVISION_TYPE)
 			continue;
-		printf("i: %d\n", i);
 		/* if does not fit in time period, reject directly */
 		if (!is_legal(events[i])) {
 			rejected[number_of_reject++] = i;
 			continue;
 		}
-		printf("Is legal!\n");
 		/* test if overlap with other event occurs */
 		int ddl = get_ddl(events[i]);
 		int result = is_overlap(events[i]);
 		if (result == OVERLAP) {
-			printf("Solvable Overlap\n");
 			if (!has_enough_slot(ddl, events[i].duration))
 				rejected[number_of_reject++] = i;
 			else
@@ -225,11 +222,9 @@ void fight_ddl() {
 		}
 		else if (result == REJECT) {
 			rejected[number_of_reject++] = i;
-			printf("Rejected %d\n", i);
 		}
 		/* no overlap, just put the activity there */
 		else {
-			printf("Just put there!\n");
 			while ((events[i].rest_t)-- > 0)
 				schedule[ddl--] = i;
 		}
@@ -269,7 +264,6 @@ void fight_ddl() {
 		}
 		else if (result == REJECT) {
 			rejected[number_of_reject++] = i;
-			printf("Rejected %d\n", i);
 		}
 		/* no overlap, just put the activity there */
 		else {
@@ -281,8 +275,6 @@ void fight_ddl() {
 	print_result();
 	free(schedule);
 	printf("\nScheduling Complete!\n");
-	
-
 }
 
 /*
