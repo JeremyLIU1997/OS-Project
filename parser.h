@@ -59,6 +59,7 @@ extern int period_start_date;
 extern int period_end_date;
 extern int period_start_time;
 extern int period_end_time;
+extern char report_filename[100];
 
 // prototypes
 void parse();

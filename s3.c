@@ -14,6 +14,7 @@ void getInput(char *instr);
 void cmdToChild(int fd_toC[][2], char *instr);
 void toChild(int fd_toC[][2], char *instr);
 void test(int fd_toC[][2], int i);//to be deleted
+char report_filename[100];
 
 /* global variable */
 int fd_toC[CHILD_NUM][2], fd_toP[CHILD_NUM][2];
@@ -47,6 +48,8 @@ int main(int argc, char *argv[]) {
 			while ((n = read(fd_toC[i][0],str,BUF_SIZE)) > 0) {
 				str[n] = '\n'; str[n+1] = 0;
 				write(fd_toP[i][1],"O",1); /* ACK message */
+				if (strncmp(str,"run",3) == 0)
+					parse();
 				if (strcmp(str,"run ddl\n") == 0) {
 					printf("Fighting Deadlines !!!\n");
 					create_scheduler(DDL_FIGHTER);

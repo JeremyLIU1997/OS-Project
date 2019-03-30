@@ -28,6 +28,7 @@ int number_of_reject = 0;
 
 // prototypes
 int get_ddl(struct Event e);
+void generate_summary();
 
 int compareTo(const void* a, const void* b) {
 	struct Event* structA = (struct Event*) a;
@@ -87,7 +88,6 @@ void init() {
 	}
 	total_hours = get_hour_diff(period_start_date,period_end_date,period_start_time,period_end_time);
 	schedule = (int*) malloc(sizeof(int) * total_hours);
-	printf("%d\n", get_hour_diff(period_start_date,period_end_date,period_start_time,period_end_time));
 	for (int i = 0; i < total_hours; ++i)
 		schedule[i] = 0;
 }
@@ -173,7 +173,7 @@ void fight_ddl() {
 		while(ddl >= 0 && events[i].rest_t > 0) {
 			if (schedule[ddl--] != 0)
 				continue;
-			schedule[ddl+1] = events[i].id;
+			schedule[ddl+1] = i;
 			(events[i].rest_t)--;
 		}
 	}
@@ -205,7 +205,7 @@ void fight_ddl() {
 					if (events[schedule[index+1]].type == REVISION_TYPE || events[schedule[index+1]].type == ACTIVITY_TYPE)
 						continue;
 					swap(schedule,index+1,ddl);
-					schedule[ddl--] = events[i].id;
+					schedule[ddl--] = i;
 					(events[i].rest_t)--;
 				}
 			}
@@ -216,7 +216,7 @@ void fight_ddl() {
 		/* no overlap, just put the activity there */
 		else {
 			while ((events[i].rest_t)-- > 0)
-				schedule[ddl--] = events[i].id;
+				schedule[ddl--] = i;
 		}
 	}
 
@@ -247,7 +247,7 @@ void fight_ddl() {
 					if (events[schedule[index+1]].type == REVISION_TYPE || events[schedule[index+1]].type == ACTIVITY_TYPE)
 						continue;
 					swap(schedule,index+1,ddl);
-					schedule[ddl--] = events[i].id;
+					schedule[ddl--] = i;
 					(events[i].rest_t)--;
 				}
 			}
@@ -258,13 +258,39 @@ void fight_ddl() {
 		/* no overlap, just put the activity there */
 		else {
 			while ((events[i].rest_t)-- > 0)
-				schedule[ddl--] = events[i].id;
+				schedule[ddl--] = i;
 		}
 	}
 	
 	print_result();
+	generate_summary();
 	free(schedule);
+
 	printf("\nScheduling Complete!\n");
+}
+
+void generate_report() {
+	FILE *report = fopen("./summary/ddl_fighter_report.txt", "w");
+
+
+	fclose(report);
+}
+
+void generate_summary() {
+	FILE *summary = fopen("./summary/ddl_fighter_summary.txt", "w");
+	fprintf(summary, "***** Summary Report *****\n");
+	fprintf(summary, "\nAlgorithm: Deadline Fighter Algorithm\n");
+	fprintf(summary, "\nNumber of requests: %d\n",event_counter);
+	fprintf(summary, "Number of rejected: %d, [ ", number_of_reject);
+	for (int i = 0; i < number_of_reject; ++i)
+		fprintf(summary, "%d ", rejected[i]);
+	fprintf(summary, "]\n\n");
+
+	int hours_used = 0;
+	for (int i = 0; i < total_hours; ++i)
+		if (schedule[i] != 0) hours_used++;
+	fprintf(summary, "Hours used: %d/%d\n",hours_used,total_hours);
+	fclose(summary);
 }
 
 /*

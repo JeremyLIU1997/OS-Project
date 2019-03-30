@@ -50,7 +50,6 @@ void print_event(int i) {
 	printf("------------------\n");
 }
 
-
 void parse_date(char* temp, int* dest) {
 	char date_temp[9]; int end=0;
 	for (int j = 0; j < strlen(temp); ++j)
@@ -63,12 +62,10 @@ void parse_date(char* temp, int* dest) {
 	*dest = (int)atoi(date_temp);
 } 
 
-
-
 // functions
 void parse() {
 
-	printf("Start!\n");
+	printf("Parsing!\n");
 	event_counter--;
 	for (int i = 1; i <= event_counter; ++i)
 		events[i].id = i;

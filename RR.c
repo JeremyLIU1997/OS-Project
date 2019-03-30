@@ -109,6 +109,7 @@ long int Round_Robin(int q, struct Event* head, struct Event* tail, int start_da
 	return (accepted_events*10000000000 + cur_time); // use one integer to return two integers
 }
 
+/*
 int main(int argc, char *argv[]) {
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
@@ -144,4 +145,4 @@ int main(int argc, char *argv[]) {
 	fprintf(summary, "Number of time slots used: %d\n", (temp2-20190408)*(23-19) + (temp1-19));
 	printf("Round Robin has finished!\n");
 }
-
+*/
