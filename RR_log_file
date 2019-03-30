@@ -1,0 +1,7 @@
+***Log File - Round Robin***
+ID Event                         Accepted/Rejected
+==================================================
+3 addRevision COMP2000 2019-4-14 19:00 2    Rejected
+4 addActivity Meeting 2019-4-18 20:00 2    Rejected
+1 addAssignment COMP2432A1 2019-4-18 12          Accepted
+2 addProject COMP2422P1 2019-4-20 26          Accepted
