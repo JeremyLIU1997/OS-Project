@@ -96,18 +96,7 @@ void init() {
 		schedule[i] = 0;
 }
 
-/*
-We ensure the highest unit_benefit
-task be done as much as possible, by
-ensuring enough time is set aside (its
-duration number of hours) just before 
-its deadline.
-Activity and revision is scheduled at
-after project and assignments are 
-scheduled, if the time slot happes
-to be available.
-*/
-
+/* check if the revision/activity has overlaps with already scheduled events */
 int has_overlap(struct Event e) {
 	int ddl = get_ddl(e);
 	bool overlap = false;
@@ -298,10 +287,6 @@ void generate_intermediate_timetable() {
 	FILE *file = fopen("./summary/ddl_fighter_result.txt", "w");
 	int current_time = -1;
 	int current_date;
-	for (int i = 1; i <= event_counter; ++i)
-	{
-		print_event(i);
-	}
 	for (int i = 0; i < total_hours; ++i)
 	{
 		current_date = i / HOUR_PER_DAY + period_start_date;
