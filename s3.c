@@ -45,10 +45,10 @@ int main(int argc, char *argv[]) {
 			
 			int n=0;
 			char str[100];
+			bool parsed = false;
 			while ((n = read(fd_toC[i][0],str,BUF_SIZE)) > 0) {
 				str[n] = '\n'; str[n+1] = 0;
 				write(fd_toP[i][1],"O",1); /* ACK message */
-				bool parsed = false;
 				if (strncmp(str,"run",3) == 0 && parsed == false) {
 					parsed = true;
 					parse();
