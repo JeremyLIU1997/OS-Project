@@ -42,10 +42,17 @@ long int Round_Robin(int q, struct Event* head, struct Event* tail, int start_da
 				cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
 				accepted_events++;
 				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
-			} else {
+				situation = 1;
+			} else if (cur_time > head->date*100 + head->time) {
 				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+				situation = 1;
+			} else {
+				head->percent = head->percent + (float)q/head->duration;
+				tail->next = head;
+				tail = tail->next;
+				head = head->next;
+				tail->next = NULL;
 			}
-			situation = 1;
 		}
 		
 		/* Project or Assignment */
@@ -76,7 +83,7 @@ long int Round_Robin(int q, struct Event* head, struct Event* tail, int start_da
 			}
 		}	
 		
-		/* Dequeue */
+		/* Throw away the rejected or finished Event */
 		if (situation==1) { // the current event should be removed from the queue
 			if (head->next==NULL) { // the Event is the last one
 				head = NULL;
