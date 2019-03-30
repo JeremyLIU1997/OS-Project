@@ -39,11 +39,11 @@ Each level up add 3
 
 // structs
 struct Event {
-	char id[5];
-	int type;
+	int id;
+	int type; // 0: Project, 1: Assignment, 2: Revision, 3: Activity
 	char name[30];
-	int date;
-	int time;
+	int date; // format: YYYYMMDD
+	int time; // format: hh (0<=hh<=23), -1 represents invalid
 	int ddl;
 	int duration;
 	int rest_t; // the remaining hours
