@@ -7,7 +7,10 @@
 #define PROJECT_TYPE 1
 #define REVISION_TYPE 2
 #define ACTIVITY_TYPE 3
-#define GREEDY_ALG 0
+#define DDL_FIGHTER 0
+#define RR 1
+#define PR 2
+
 
 #include "ddl_fighter.h"
 

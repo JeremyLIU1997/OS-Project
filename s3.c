@@ -43,20 +43,32 @@ int main(int argc, char *argv[]) {
 			close(fd_toP[i][0]);
 			
 			int n=0;
-			while ((n = read(fd_toC[i][0],command[event_counter],BUF_SIZE)) > 0) {
+			char str[100];
+			while ((n = read(fd_toC[i][0],str,BUF_SIZE)) > 0) {
+				str[n] = '\n'; str[n+1] = 0;
 				write(fd_toP[i][1],"O",1); /* ACK message */
-				command[event_counter][n] = '\n';
-				command[event_counter][n+1] = 0;
-				if (strcmp(command[event_counter],"run\n") == 0) {
-					printf("RUN!!!\n");
-					parse();
-					break;
+				if (strcmp(str,"run ddl\n") == 0) {
+					printf("Fighting Deadlines !!!\n");
+					create_scheduler(DDL_FIGHTER);
+					continue;
 				}
-				event_counter++;
+				else if (strcmp(str,"run rr\n") == 0) {
+					printf("run rr!\n");
+					create_scheduler(RR);
+					continue;
+				}
+				else if (strcmp(str,"run pr\n") == 0) {
+					printf("run pr!\n");
+					create_scheduler(PR);
+					continue;
+				} 
+				else if (strcmp(str,"exitS3\n") == 0) {
+					printf("Parser Exited!\n");
+					exit(0);
+				}
+				/* Increment event_counter only if NOT run command */
+				strcpy(command[event_counter++],str);
 			}
-			
-			create_scheduler(GREEDY_ALG);
-
 			
 			/* call schedulers... */
 
@@ -82,9 +94,10 @@ int main(int argc, char *argv[]) {
 
 		while (1) {
 			getInput(instr);
-			if (strcmp(instr, "exitS3") == 0) break;
 			
 			cmdToChild(fd_toC, instr);
+
+			if (strcmp(instr, "exitS3") == 0) break;
 
 
 		}

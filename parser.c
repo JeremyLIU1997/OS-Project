@@ -5,7 +5,8 @@
 
 // my headers
 #include "parser.h"
-
+#include "RR.h"
+#include "pr.h"
 // macros
 
 // prototypes
@@ -71,6 +72,8 @@ void parse() {
 
 	printf("Start!\n");
 	event_counter--;
+	for (int i = 1; i <= event_counter; ++i)
+		events[i].id = i;
 	for (int i = 0; i <= event_counter; ++i)
 	{
 		int a = 0;
@@ -79,7 +82,6 @@ void parse() {
 		split(command[i],temp,start);
 		(*start)++;
 		if (i == 0) {
-
 			if (!(strcmp(temp,"addPeriod") == 0)) {
 				printf("Must add period first. Exit.\n");
 				exit(1);
@@ -145,12 +147,15 @@ void parse() {
 
 /* parser is responsible for creating scheduler upon command */
 void create_scheduler(int option) {
-	int pid = fork();
 
-	if (pid == 0) {
-		if (option == GREEDY_ALG) {
-			fight_ddl();
-		}
+	if (option == DDL_FIGHTER) {
+		fight_ddl();
+	}
+	else if (option == RR) {
+		Round_Robin();
+	}
+	else if (option == PR) {
+
 	}
 
 	wait(NULL);
