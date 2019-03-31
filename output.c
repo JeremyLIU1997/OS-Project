@@ -105,7 +105,7 @@ void output(char *filename, char *algorithm) {
 		printf("%-20s", "N/A");
 		time++;
 	}
-	
+	printf("\n");
 }
 
 
