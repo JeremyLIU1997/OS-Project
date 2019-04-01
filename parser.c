@@ -5,6 +5,7 @@
 
 // my headers
 #include "parser.h"
+#include "RR.h"
 // macros
 
 // prototypes
@@ -148,7 +149,7 @@ void create_scheduler(int option) {
 		fight_ddl();
 	}
 	else if (option == RR) {
-		// Round_Robin();
+		RR_invoker(events, event_counter, q, period_start_date, period_end_date, period_start_time, period_end_time)
 	}
 	else if (option == PR) {
 

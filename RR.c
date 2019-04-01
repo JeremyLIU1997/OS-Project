@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "parser.h"
 #include "RR.h"
 
 /*
@@ -21,7 +21,7 @@ Notes:
 int print_slots_alloc(struct Event* head, int cur_time, int slots_elapsed, int start_time, int end_time, FILE* sch_result) {
 	int i, temp=cur_time;
 	for (i=0;i<slots_elapsed;i++) {
-		if (temp%100>=end_time) { // will overflow
+		if (temp%100>=end_time) { // deal with overflow
 			temp = (temp/100 + 1)*100 + start_time;
 		}
 		fprintf(sch_result, "%d %d %d %s %d %.2f \n", temp/100, temp%100, head->id, head->name, head->type, head->percent);
@@ -30,12 +30,22 @@ int print_slots_alloc(struct Event* head, int cur_time, int slots_elapsed, int s
 	return temp;
 }
 
-void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, int end_date, int start_time, int end_time, FILE* sch_result, FILE* log_file, FILE* summary, int total_requests) {
-	int cur_time = start_date*100 + start_time, situation=0, slots_elapsed=0, accepted_events=0, total_slots=0;
-	
+void print_queue(struct Event* head) {
+	while (head!=NULL) {
+		printf("%s-->", head->name);
+		head = head->next;
+	}
+	printf("NULL\n");
+}
+
+void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, int end_date, int start_time, int end_time, FILE* sch_result, FILE* log_file, FILE* summary, int total_requests, int pro_ass_count) {
+	int cur_time = start_date*100 + start_time, situation=0, slots_elapsed=0, accepted_events=0, total_slots=0, flag=0;
+	struct Event* temp=NULL;
 	char* operations[] = {"addProject", "addAssignment", "addRevision", "addActivity"};
 	
 	while (tail!=NULL && cur_time<(end_date*100+end_time)) {	
+		printf("%d   ", cur_time);
+		print_queue(head);
 		situation = 0;
 		
 		/* Revision or Activity */
@@ -54,13 +64,31 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
 				situation = 1;
 			} else { // the right time is in the future, return the Event back to the queue for the future
-				if (head->next==NULL) { // no more other events, arrange it now
-					cur_time = print_slots_alloc(head, head->date*100 + head->time, head->duration, start_time, end_time, sch_result); 
-					accepted_events++;
-					total_slots = total_slots + head->duration;
-					fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
-					situation = 1;
-				} else {
+				if (pro_ass_count==0) { // only Revisions and Activities are left in the queue
+					temp = head;
+					while (temp!=NULL) { // go over the queue to search for a match
+						if (cur_time == temp->date*100 + temp->time) { // there is a match
+							if (end_time - cur_time >= head->duration) { // the rest of the day is sufficient for the Event, Accept
+								cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
+								accepted_events++;
+								total_slots = total_slots + head->duration;
+								fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+							} else{ // the rest of the day is not sufficient of the Event, Reject
+								fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+							}
+							situation = 1;
+							break;
+						} else {
+							temp = temp->next;
+						}
+					}
+
+					cur_time++; // push the time for one hour
+					if (cur_time%100>=end_time) { // deal with overflow
+						cur_time = (cur_time/100 + 1)*100 + start_time;
+					}
+
+				} else { // round the Event to the back of the queue and continue RR
 					tail->next = head;
 					tail = tail->next;
 					head = head->next;
@@ -80,6 +108,7 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 				head->rest_t = head->rest_t + q - slots_elapsed; // remove the excessive part of completion
 				cur_time = print_slots_alloc(head, cur_time-q, slots_elapsed, start_time, end_time, sch_result);
 				accepted_events++;
+				pro_ass_count--;
 				total_slots = total_slots + slots_elapsed;
 				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration);
 				situation = 1;
@@ -94,6 +123,7 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 			} else { // the Event has been completed
 				cur_time = print_slots_alloc(head, cur_time-q, q+head->rest_t, start_time, end_time, sch_result);
 				accepted_events++;
+				pro_ass_count--;
 				total_slots = total_slots + q + head->rest_t;
 				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration);
 				situation = 1;
@@ -131,31 +161,32 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 	fprintf(summary, "Number of time slots used: %d\n", total_slots);
 }
 
-int main(int argc, char *argv[]) {
+void RR_invoker(struct Event events[1000], int event_counter, int q, int period_start_date, int period_end_date, int period_start_time, int period_end_time) {
+	printf("Enter the invoker!\n");
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
-	struct Event a1 = {.id=1, .type=1, .name="COMP2432A1", .date=20190418, .time=-1, .duration=12, .rest_t=12, .percent=0.0, .next=NULL};
-	struct Event a2 = {.id=2, .type=0, .name="COMP2422P1", .date=20190420, .time=-1, .duration=26, .rest_t=26, .percent=0.0, .next=NULL};
-	struct Event a3 = {.id=3, .type=2, .name="COMP2000",   .date=20190414, .time=19, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
-	struct Event a4 = {.id=4, .type=3, .name="Meeting",    .date=20190418, .time=20, .duration=2,  .rest_t=2,  .percent=-1,  .next=NULL};
+	int i = 0, pro_ass_count = 0;
 	FILE *sch_result = fopen("./RR_result", "w"), *log_file = fopen("./RR_log_file", "w"), *summary = fopen("./RR_summary", "w");
-	long int result = 0;
-	int total_requests = 4;
+
+	head = &events[1];
+	for (i=1;i<=event_counter-1;i++) {
+		events[i].next = &events[i+1];
+		if (events[i].type==0 || events[i].type==1) {
+			pro_ass_count++;
+		}
+	}
+	events[event_counter].next = NULL;
+	tail = &events[event_counter];
 	
 	fprintf(log_file, "***Log File - Round Robin***\n");
 	fprintf(log_file, "ID Event                         Accepted/Rejected\n");
 	fprintf(log_file, "==================================================\n");
 	fprintf(summary, "***Summary Report***\n");
 	fprintf(summary, "\nAlgorithm used: Round Robin\n");
-	fprintf(summary, "\nThere are %d requests\n", total_requests);
-	
-	head = &a1;
-	a1.next = &a2;
-	a2.next = &a3;
-	a3.next = &a4;
-	tail = &a4;
-	
-	Round_Robin(1, head, tail, 20190408, 20190421, 19, 23, sch_result, log_file, summary, total_requests);
+	fprintf(summary, "\nThere are %d requests\n", event_counter);
+		
+	printf("Execute RR now!\n");
+	Round_Robin(q, head, tail, period_start_date, period_end_date, period_start_time, period_end_time, sch_result, log_file, summary, event_counter, pro_ass_count);
 	
 	fclose(sch_result);
 	fclose(log_file);
