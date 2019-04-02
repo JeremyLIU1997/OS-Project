@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-// #include "parser.h"
+#include "parser.h"
 #include "RR.h"
 
 /*
@@ -132,7 +132,7 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 		if (head->type==2 || head->type==3) {
 			fprintf(log_file, " %d:00 %d    ", head->time, head->duration);
 		} else {
-			fprintf(log_file, " %d          ", head->time, head->duration);
+			fprintf(log_file, " %d          ", head->duration);
 		}
 		fprintf(log_file, "Rejected\n");
 		head = head->next;
