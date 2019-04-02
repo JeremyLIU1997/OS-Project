@@ -30,14 +30,6 @@ int print_slots_alloc(struct Event* head, int cur_time, int slots_elapsed, int s
 	return temp;
 }
 
-void print_queue(struct Event* head) {
-	while (head!=NULL) {
-		printf("%s-->", head->name);
-		head = head->next;
-	}
-	printf("NULL\n");
-}
-
 void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, int end_date, int start_time, int end_time, FILE* sch_result, FILE* log_file, FILE* summary, int total_requests, int pro_ass_count) {
 	int cur_time = start_date*100 + start_time, situation=0, slots_elapsed=0, accepted_events=0, total_slots=0, flag=0;
 	struct Event* temp=NULL;
@@ -49,8 +41,6 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 		/* Revision or Activity */
 		if (head->type==2 || head->type==3) {			
 			if (cur_time == head->date*100 + head->time) { // it's the right time
-				printf("%d   ", cur_time);
-				print_queue(head);
 				if (end_time - cur_time%100 >= head->duration) { // the rest of the day is sufficient for the Event, Accept
 					cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
 					accepted_events++;
@@ -144,9 +134,6 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 }
 
 void RR_invoker(struct Event events[1000], int event_counter, int q, int period_start_date, int period_end_date, int period_start_time, int period_end_time) {
-	printf("Enter the invoker!\n");
-	for (int i = 1; i <= event_counter; ++i)
-		events[i].rest_t = events[i].duration;
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
@@ -155,10 +142,12 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	head = &events[1];
 	for (i=1;i<=event_counter-1;i++) {
 		events[i].next = &events[i+1];
+		events[i].rest_t = events[i].duration;
 		if (events[i].type==0 || events[i].type==1) {
 			pro_ass_count++;
 		}
 	}
+	events[event_counter].rest_t = events[event_counter].duration;
 	events[event_counter].next = NULL;
 	tail = &events[event_counter];
 	
@@ -169,12 +158,10 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	fprintf(summary, "\nAlgorithm used: Round Robin\n");
 	fprintf(summary, "\nThere are %d requests\n", event_counter);
 		
-	printf("Execute RR now!\n");
 	Round_Robin(q, head, tail, period_start_date, period_end_date, period_start_time, period_end_time, sch_result, log_file, summary, event_counter, pro_ass_count);
 	
 	fclose(sch_result);
 	fclose(log_file);
 	fclose(summary);
-	printf("Round Robin has finished!\n");
 }
 
