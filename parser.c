@@ -67,7 +67,7 @@ void parse_date(char* temp, int* dest) {
 // functions
 void parse() {
 
-	printf("Parsing!\n");
+	// printf("Parsing!\n");
 	event_counter--;
 	for (int i = 1; i <= event_counter; ++i)
 		events[i].id = i;

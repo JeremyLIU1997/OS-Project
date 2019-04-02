@@ -154,7 +154,7 @@ void fight_ddl() {
 
 	qsort(events+1, event_counter, sizeof(events[0]), compareTo);
 
-	printf("Deadline fighter scheduling...\n");
+	// printf("Deadline fighter scheduling...\n");
 	/* handle project and assignment first */
 	for (int i = 1; i <= event_counter; ++i)
 	{
@@ -258,14 +258,14 @@ void fight_ddl() {
 	for (int i = 0; i < number_of_reject; ++i)
 		events[rejected[i]].status = REJECTED;
 	
-	print_result();
+	// print_result();
 	generate_summary();
 	generate_log();
 	generate_intermediate_timetable();
 
 	free(schedule);
 
-	printf("\nScheduling Complete!\n");
+	// printf("\nScheduling Complete!\n");
 }
 
 void generate_log() {

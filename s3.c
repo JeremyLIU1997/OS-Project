@@ -54,17 +54,17 @@ int main(int argc, char *argv[]) {
 					parse();
 				}
 				if (strcmp(str,"run ddl\n") == 0) {
-					printf("Fighting Deadlines !!!\n");
+					// printf("Fighting Deadlines !!!\n");
 					create_scheduler(DDL_FIGHTER);
 					continue;
 				}
 				else if (strcmp(str,"run rr\n") == 0) {
-					printf("run rr!\n");
+					// printf("run rr!\n");
 					create_scheduler(RR);
 					continue;
 				}
 				else if (strcmp(str,"run pr\n") == 0) {
-					printf("run pr!\n");
+					// printf("run pr!\n");
 					create_scheduler(PR);
 					continue;
 				} 

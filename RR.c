@@ -150,7 +150,7 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
-	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
+	FILE *sch_result = fopen("./summary/RR_result.txt", "w"), *log_file = fopen("./summary/RR_log_file.txt", "w"), *summary = fopen("./summary/RR_summary.txt", "w");
 
 	head = &events[1];
 	for (i=1;i<=event_counter-1;i++) {
