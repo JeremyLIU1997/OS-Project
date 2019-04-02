@@ -120,11 +120,11 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 	while (head!=NULL) {
 		fprintf(log_file, "%d %s %s %d-%d-%d", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100);
 		if (head->type==2 || head->type==3) {
-			fprintf(log_file, " %d:00 %d    ", head->time, head->duration);
+			fprintf(log_file, " %d:00 %d    Rejected\n", head->time, head->duration);
 		} else {
-			fprintf(log_file, " %d          ", head->duration);
+			fprintf(log_file, " %d          Rejected\n", head->duration);
 		}
-		fprintf(log_file, "Rejected\n");
+
 		head = head->next;
 	}
 	
@@ -137,29 +137,44 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
-	FILE *sch_result = fopen("./summary/RR_result.txt", "w"), *log_file = fopen("./summary/RR_log_file.txt", "w"), *summary = fopen("./summary/RR_summary.txt", "w");
+	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
 
 	head = &events[1];
-	for (i=1;i<=event_counter-1;i++) {
-		events[i].next = &events[i+1];
+	for (i=1;i<=event_counter;i++) {
+		if (i<event_counter) {
+			events[i].next = &events[i+1];
+		} else {
+			events[event_counter].next = NULL;
+		}
 		events[i].rest_t = events[i].duration;
 		if (events[i].type==0 || events[i].type==1) {
 			pro_ass_count++;
 		}
 	}
-	events[event_counter].rest_t = events[event_counter].duration;
-	events[event_counter].next = NULL;
 	tail = &events[event_counter];
 	
-	fprintf(log_file, "*** Log File - Round Robin ***\n");
+	fprintf(log_file, "***Log File - Round Robin***\n");
 	fprintf(log_file, "ID Event                         Accepted/Rejected\n");
 	fprintf(log_file, "==================================================\n");
-	fprintf(summary, "*** Summary Report ***\n");
+	fprintf(summary, "***Summary Report***\n");
 	fprintf(summary, "\nAlgorithm used: Round Robin\n");
 	fprintf(summary, "\nThere are %d requests\n", event_counter);
 		
 	Round_Robin(q, head, tail, period_start_date, period_end_date, period_start_time, period_end_time, sch_result, log_file, summary, event_counter, pro_ass_count);
 	
+	fprintf(log_file, "\n==================================================\n");
+	for (i=1;i<=event_counter;i++) {
+		if (events[i].type==0 || events[i].type==1) {
+			if (events[i].date<period_start_date || events[i].date>period_end_time) {
+				fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
+			}
+		} else {
+			if (events[i].date<period_start_date || events[i].date>period_end_date || events[i].time<period_start_time || events[i].time>=period_end_time) {
+				fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
+			}
+		}
+	}
+
 	fclose(sch_result);
 	fclose(log_file);
 	fclose(summary);
