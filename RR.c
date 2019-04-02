@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
+// #include "parser.h"
 #include "RR.h"
 
 /*
@@ -43,15 +43,15 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 	struct Event* temp=NULL;
 	char* operations[] = {"addProject", "addAssignment", "addRevision", "addActivity"};
 	
-	while (tail!=NULL && cur_time<(end_date*100+end_time)) {	
-		printf("%d   ", cur_time);
-		print_queue(head);
+	while (tail!=NULL && cur_time<(end_date*100+end_time)) {
 		situation = 0;
 		
 		/* Revision or Activity */
 		if (head->type==2 || head->type==3) {			
 			if (cur_time == head->date*100 + head->time) { // it's the right time
-				if (end_time - cur_time >= head->duration) { // the rest of the day is sufficient for the Event, Accept
+				printf("%d   ", cur_time);
+				print_queue(head);
+				if (end_time - cur_time%100 >= head->duration) { // the rest of the day is sufficient for the Event, Accept
 					cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
 					accepted_events++;
 					total_slots = total_slots + head->duration;
@@ -65,24 +65,6 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 				situation = 1;
 			} else { // the right time is in the future, return the Event back to the queue for the future
 				if (pro_ass_count==0) { // only Revisions and Activities are left in the queue
-					temp = head;
-					while (temp!=NULL) { // go over the queue to search for a match
-						if (cur_time == temp->date*100 + temp->time) { // there is a match
-							if (end_time - cur_time >= head->duration) { // the rest of the day is sufficient for the Event, Accept
-								cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
-								accepted_events++;
-								total_slots = total_slots + head->duration;
-								fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
-							} else{ // the rest of the day is not sufficient of the Event, Reject
-								fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
-							}
-							situation = 1;
-							break;
-						} else {
-							temp = temp->next;
-						}
-					}
-
 					cur_time++; // push the time for one hour
 					if (cur_time%100>=end_time) { // deal with overflow
 						cur_time = (cur_time/100 + 1)*100 + start_time;
@@ -166,7 +148,7 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
-	FILE *sch_result = fopen("./RR_result", "w"), *log_file = fopen("./RR_log_file", "w"), *summary = fopen("./RR_summary", "w");
+	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
 
 	head = &events[1];
 	for (i=1;i<=event_counter-1;i++) {
