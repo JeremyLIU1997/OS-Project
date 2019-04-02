@@ -46,15 +46,10 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
             int time_to_ddl = (cur->date - cur_date)*(end_time - start_time) + today_end - cur_time;
             if (rem_time >= cur->rest_t){
                 if (time_to_ddl >= cur->rest_t) {
-                    cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
+                    //cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
                     printf("Event (id: %d, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                    fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
                     // the Event has been completed
-                }
-                else{
-                    cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
-                    printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
                     cur_time += cur->duration;
                     int overflow = (cur_time % cur_date) - end_time;
                     if (overflow > 0){
@@ -62,6 +57,12 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
                         int remainder = overflow % (end_time - start_time);
                         cur_time = (cur_date + 1 + day_spent) * 100 + start_time + remainder;
                     }
+                }
+                else{
+                    cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
+                    printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
+                    fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                    cur_time = cur->date * 100 + 100 + start_time;
                 }
                 if (cur->next==NULL) { // the Event is the last one
 					cur = NULL;
