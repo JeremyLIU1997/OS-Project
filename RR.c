@@ -145,6 +145,8 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 
 void RR_invoker(struct Event events[1000], int event_counter, int q, int period_start_date, int period_end_date, int period_start_time, int period_end_time) {
 	printf("Enter the invoker!\n");
+	for (int i = 1; i <= event_counter; ++i)
+		events[i].rest_t = events[i].duration;
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
