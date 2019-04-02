@@ -56,11 +56,17 @@ int get_hour_diff(int date1, int date2, int time1, int time2) {
 
 /* Test if an event is within the time bound */
 bool is_legal(struct Event e) {
-	if (e.time < DAY_START || (e.time + e.duration) > DAY_END)
+	if (e.type == REVISION_TYPE || e.type == ACTIVITY_TYPE) {
+		if (e.time < DAY_START || (e.time + e.duration) > DAY_END)
 		return false;
-	int ddl = get_ddl(e);
-	if ( ddl >= total_hours || (ddl - e.duration) < 0)
-		return false;
+		int ddl = get_ddl(e);
+		if ( ddl >= total_hours || (ddl - e.duration) < 0)
+			return false;
+	}
+	else {
+		if (e.date > period_end_date || e.date < period_start_date)
+			return false;
+	}
 	return true;
 }
 
@@ -147,6 +153,16 @@ void print_result() {
 	printf("Rejected: ");
 	for (int i = 0; i < number_of_reject; ++i)
 		printf("%d ", rejected[i]);
+}
+
+bool is_error(struct Event e) {
+	if (e.date < period_start_date || e.date > period_end_date)
+		return true;
+	if (e.time > DAY_END || e.time < DAY_START)
+		return true;
+	if (e.type == ACTIVITY_TYPE || e.type == REVISION_TYPE)
+		return !is_legal(e);
+	return false;
 }
 
 void fight_ddl() {
@@ -279,6 +295,13 @@ void generate_log() {
 		strcpy(temp,command[events[i].id]);
 		temp[strlen(temp)-1] = 0;
 		fprintf(log, "%d\t%s\t\t\t%s\n",events[i].id,temp,dict[events[i].status]);
+	}
+	fprintf(log, "\n===============================================================\n");
+	fprintf(log,"Errors (if any):\n");
+	for (int i = 1; i <= event_counter; ++i)
+	{
+		if (is_error(events[i]) == true)
+			fprintf(log,"Event #%d contains error.\n", events[i].id);
 	}
 	fclose(log);
 }

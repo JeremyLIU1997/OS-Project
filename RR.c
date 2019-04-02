@@ -151,10 +151,10 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	events[event_counter].next = NULL;
 	tail = &events[event_counter];
 	
-	fprintf(log_file, "***Log File - Round Robin***\n");
+	fprintf(log_file, "*** Log File - Round Robin ***\n");
 	fprintf(log_file, "ID Event                         Accepted/Rejected\n");
 	fprintf(log_file, "==================================================\n");
-	fprintf(summary, "***Summary Report***\n");
+	fprintf(summary, "*** Summary Report ***\n");
 	fprintf(summary, "\nAlgorithm used: Round Robin\n");
 	fprintf(summary, "\nThere are %d requests\n", event_counter);
 		

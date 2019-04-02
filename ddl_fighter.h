@@ -8,5 +8,6 @@
 #define REJECTED 1
 
 void fight_ddl();
+bool is_error(struct Event e);
 
 #endif
