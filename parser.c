@@ -149,7 +149,7 @@ void create_scheduler(int option) {
 		fight_ddl();
 	}
 	else if (option == RR) {
-		RR_invoker(events, event_counter, q, period_start_date, period_end_date, period_start_time, period_end_time)
+		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
 	}
 	else if (option == PR) {
 
