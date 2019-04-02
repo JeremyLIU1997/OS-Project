@@ -169,7 +169,7 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 				fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
 			}
 		} else {
-			if (events[i].date<period_start_date || events[i].date>period_end_date || events[i].time<period_start_time || events[i].time>=period_end_time) {
+			if (events[i].date<period_start_date || events[i].date>period_end_date || events[i].time<period_start_time || events[i].time>=period_end_time || events[i].duration>(end_time-start_time)) {
 				fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
 			}
 		}
