@@ -162,12 +162,17 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 		
 	Round_Robin(q, head, tail, period_start_date, period_end_date, period_start_time, period_end_time, sch_result, log_file, summary, event_counter, pro_ass_count);
 	
-	fprintf(log_file, "\n===============================================================\n");
-	fprintf(log_file,"Errors (if any):\n");
-	for (int i = 1; i <= event_counter; ++i)
-	{
-		if (is_error(events[i]) == true)
-			fprintf(log_file,"Event #%d contains error.\n", events[i].id);
+	fprintf(log_file, "\n==================================================\n");
+	for (i=1;i<=event_counter;i++) {
+		if (events[i].date<period_start_date || events[i].date>period_end_date) {
+			fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
+		} else {
+			if (events[i].type==2 || events[i].type==3) {
+				if (events[i].time<period_start_time || events[i].time>=period_end_time || events[i].duration>(period_end_time-events[i].time)) {
+					fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
+				}
+			}
+		}
 	}
 
 	fclose(sch_result);
