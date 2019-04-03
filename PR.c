@@ -8,11 +8,11 @@
 
 struct Event * Sort_By_Priority(struct Event* head, int length);
 
-void Priority(struct Event* head,  int start_date, int end_date, int start_time, int end_time, FILE* sch_result, FILE* log_file, FILE* summary){
+void Priority(struct Event* head,  int start_date, int end_date, int start_time, int end_time,int length, FILE* sch_result, FILE* log_file, FILE* summary){
     /*No exemption for this version*/
     int cur_time = start_date*100 + start_time;
     int total_slots = (end_time-start_time)*(end_date-start_date+1);
-    int slot;
+    int slot, accept = 0;
     int *slots = (int *)malloc(total_slots * (sizeof(int)));
     for (int i = 0; i < total_slots; i++){
         slots[i] = 0;
@@ -49,6 +49,7 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
                         }
                         printf("Event (id: %d, name: %s, type: %d) has been accepted\n", cur->id, cur->name, cur->type);
                         fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                        accept++;
                     }
                 }
             }
@@ -58,7 +59,7 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
 			}
 			if (cur->next == NULL) {
                 cur = NULL;
-                return;
+                break;
 			}
 			else {
 			    cur = cur->next;
@@ -76,6 +77,7 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
                     //cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
                     printf("Event (id: %d, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                    accept++;
                     // the Event has been completed
                     slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
                     cur_time += cur->duration;
@@ -94,32 +96,40 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
                     cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
                     printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                    accept++;
                     cur_time = cur->date * 100 + 100 + start_time;
                 }
                 if (cur->next==NULL) { // the Event is the last one
 					cur = NULL;
-					return;
+					break;
 				} else {
 					cur = cur->next;
 				}
             }
 			else { // it fails to finish
                 printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
+                fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+
+                accept++;
+                slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
 				if (cur->next==NULL) { // the Event is the last one
 					cur = NULL;
-					return;
+					break;
 				} else {
 					cur = cur->next;
 				}
 			}
 		}
     }
+    fprintf(summary, "\nNumber of requests accepted: %d\n", accept);
+    fprintf(summary, "Number of requests rejected: %d\n", length-accept);
+	//fprintf(summary, "Number of time slots used: %d\n", );
      /* Clear the remaining rejected events */
 	while (cur!=NULL) {
 		printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
 		cur = cur->next;
 	}
-
+    return;
 }
 
 struct Event * Sort_By_Priority(struct Event* head, int length){
@@ -174,7 +184,7 @@ int main(){
         printf("Event (id: %s, name: %s, type: %d)\n",cur->id, cur->name, cur->type);
         cur = cur->next;
     }*/
-    Priority(head, 20190408, 20190421, 19, 23, sch_result, log_file, summary);
+    Priority(head, 20190408, 20190421, 19, 23, length, sch_result, log_file, summary);
     fclose(sch_result);
 	fclose(log_file);
 	fclose(summary);
