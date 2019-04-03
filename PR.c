@@ -121,9 +121,13 @@ void Priority(struct Event* head,  int start_date, int end_date, int start_time,
 			}
 		}
     }
+    int slots_used = 0;
+    for (int i = 0; i < total_slots; i++){
+        slots_used += slots[i];
+    }
     fprintf(summary, "\nNumber of requests accepted: %d\n", accept);
     fprintf(summary, "Number of requests rejected: %d\n", length-accept);
-	//fprintf(summary, "Number of time slots used: %d\n", );
+	fprintf(summary, "Number of time slots used: %d (%f%%)\n", slots_used, (100*(float)slots_used/(float)total_slots));
      /* Clear the remaining rejected events */
 	while (cur!=NULL) {
 		printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
