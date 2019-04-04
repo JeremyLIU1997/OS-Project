@@ -8,7 +8,7 @@
 
 struct Event * Sort_By_Priority(struct Event* head, int length);
 
-void Priority(struct Event* head,  int start_date, int end_date, int start_time, int end_time,int length, FILE* sch_result, FILE* log_file, FILE* summary){
+void Priority(struct Event* head, int start_date, int end_date, int start_time, int end_time,int length, FILE* sch_result, FILE* log_file, FILE* summary){
     /*No exemption for this version*/
     int cur_time = start_date*100 + start_time;
     int total_slots = (end_time-start_time)*(end_date-start_date+1);
@@ -160,6 +160,28 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
     return newHead;
 }
 
+void PR_invoker(struct Event events[1000], int length, int period_start_date, int period_end_date, int period_start_time, int period_end_time){
+    struct Event* head = NULL;
+	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
+
+	head = &events[1];
+	for (i=1;i<=event_counter;i++) {
+		if (i<event_counter) {
+			events[i].next = &events[i+1];
+		} else {
+			events[event_counter].next = NULL;
+		}
+		events[i].rest_t = events[i].duration;
+	}
+	tail = &events[event_counter];
+
+	head = Sort_By_Priority(head, length);
+	Priority(head, period_start_date, period_end_date, period_start_time, period_end_time, length, sch_result, log_file, summary);
+	fprintf(log_file, "\n==================================================\n");
+    fclose(sch_result);
+	fclose(log_file);
+	fclose(summary);
+}
 int main(){
     struct Event* head = NULL;
 	struct Event a1 = {.id=1, .type=1, .name="COMP2432A1", .date=20190418, .time=-1, .duration=12, .rest_t=12, .percent=0.0, .next=NULL};
@@ -189,6 +211,7 @@ int main(){
         cur = cur->next;
     }*/
     Priority(head, 20190408, 20190421, 19, 23, length, sch_result, log_file, summary);
+    fprintf(log_file, "\n==================================================\n");
     fclose(sch_result);
 	fclose(log_file);
 	fclose(summary);

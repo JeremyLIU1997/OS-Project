@@ -62,7 +62,7 @@ void parse_date(char* temp, int* dest) {
 		}
 	date_temp[end] = 0;
 	*dest = (int)atoi(date_temp);
-} 
+}
 
 // functions
 void parse() {
@@ -98,7 +98,7 @@ void parse() {
 			period_end_time = (temp[0] - '0') * 10 + (temp[1] - '0');
 			(*start)++;
 		}
-		
+
 		if (strcmp(temp,"addAssignment") == 0 || strcmp(temp,"addProject") == 0) {
 			if (strcmp(temp,"addAssignment") == 0)
 				events[i].type = ASSIGNMENT_TYPE;
@@ -152,7 +152,7 @@ void create_scheduler(int option) {
 		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
 	}
 	else if (option == PR) {
-
+        PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
 	}
 
 	wait(NULL);
