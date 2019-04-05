@@ -50,6 +50,9 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                         printf("Event (id: %d, name: %s, type: %d) has been accepted\n", cur->id, cur->name, cur->type);
                         fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
                         accept++;
+                        for (int i = 0; i < cur->duration; i++){
+                            fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                        }
                     }
                 }
             }
@@ -80,6 +83,9 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     accept++;
                     // the Event has been completed
                     slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
+                    for (int i = 0; i < cur->duration; i++){
+                        fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                    }
                     cur_time += cur->duration;
 
                     for (int i = slot; i < slot+cur->duration; i++){
@@ -98,6 +104,9 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
                     accept++;
                     cur_time = cur->date * 100 + 100 + start_time;
+                    for (int i = 0; i < time_to_ddl; i++){
+                        fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                    }
                 }
                 if (cur->next==NULL) { // the Event is the last one
 					cur = NULL;
@@ -109,7 +118,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
 			else { // it fails to finish
                 printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
                 fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
-
+                for (int i = 1; )
                 accept++;
                 slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
 				if (cur->next==NULL) { // the Event is the last one
@@ -165,16 +174,14 @@ void PR_invoker(struct Event events[1000], int length, int period_start_date, in
 	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
 
 	head = &events[1];
-	for (i=1;i<=event_counter;i++) {
-		if (i<event_counter) {
+	for (int i=1;i<=length;i++) {
+		if (i<length) {
 			events[i].next = &events[i+1];
 		} else {
-			events[event_counter].next = NULL;
+			events[length].next = NULL;
 		}
 		events[i].rest_t = events[i].duration;
 	}
-	tail = &events[event_counter];
-
 	head = Sort_By_Priority(head, length);
 	Priority(head, period_start_date, period_end_date, period_start_time, period_end_time, length, sch_result, log_file, summary);
 	fprintf(log_file, "\n==================================================\n");
