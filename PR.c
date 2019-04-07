@@ -98,7 +98,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                         cur_time = (cur_date + 1 + day_spent) * 100 + start_time + remainder;
                     }
                 }
-                else {
+                else { // it fails to finish before the ddl
                     cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
                     // printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
@@ -115,10 +115,12 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
 					cur = cur->next;
 				}
             }
-			else { // it fails to finish
+			else { // it fails to finish before end date
                 // printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
                 fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
-                for (int i = 1; ;)
+                for (int i = 0; i < rem_time; i++){
+                        fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                    }
                 accept++;
                 slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
 				if (cur->next==NULL) { // the Event is the last one
