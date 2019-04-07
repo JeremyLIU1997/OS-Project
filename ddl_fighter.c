@@ -286,7 +286,7 @@ void fight_ddl() {
 
 void generate_log() {
 	char dict[2][20] = {"ACCEPTED","REJECTED"};
-	FILE *log = fopen("./summary/ddl_fighter_log.txt", "w");
+	FILE *log = fopen("./summary/ddl_fighter_log", "w");
 	fprintf(log,"***** Log - Deadline Fighter *****\n\n");
 	fprintf(log, "ID    Name                                               Status\n");
 	fprintf(log, "===============================================================\n");
@@ -307,7 +307,7 @@ void generate_log() {
 }
 
 void generate_intermediate_timetable() {
-	FILE *file = fopen("./summary/ddl_fighter_result.txt", "w");
+	FILE *file = fopen("./summary/ddl_fighter_result", "w");
 	int current_time = -1;
 	int current_date;
 	for (int i = 0; i < total_hours; ++i)
@@ -322,7 +322,7 @@ void generate_intermediate_timetable() {
 }
 
 void generate_summary() {
-	FILE *summary = fopen("./summary/ddl_fighter_summary.txt", "w");
+	FILE *summary = fopen("./summary/ddl_fighter_summary", "w");
 	fprintf(summary, "***** Summary Report *****\n");
 	fprintf(summary, "\nAlgorithm: Deadline Fighter Algorithm\n");
 	fprintf(summary, "\nNumber of requests: %d\n",event_counter);
