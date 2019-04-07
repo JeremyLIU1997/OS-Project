@@ -25,7 +25,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
             if (cur_time <= cur->date*100 + cur->time) { // it's the right date and time
                 if (cur->date*100 + end_time - cur_time < cur->duration) { // the Revision or Activity can not be finished in one go at the current day
 					// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d          Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                    fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 				}
 				else {
                     int ifreject = 0;
@@ -38,7 +38,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     }
                     if (ifreject == 1){
                         // printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-                        fprintf(log_file, "%d %s %s %d-%d-%d %d          Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
                     }
                     else{
                         int cur_date = cur_time/100;
@@ -48,7 +48,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                             slots[i] = 1;
                         }
                         // printf("Event (id: %d, name: %s, type: %d) has been accepted\n", cur->id, cur->name, cur->type);
-                        fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
                         accept++;
                         for (int i = 0; i < cur->duration; i++){
                             fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
@@ -58,7 +58,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
             }
             else {
 				// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-				fprintf(log_file, "%d %s %s %d-%d-%d %d          Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 			}
 			if (cur->next == NULL) {
                 cur = NULL;
@@ -138,10 +138,17 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
     }
     fprintf(summary, "\nNumber of requests accepted: %d\n", accept);
     fprintf(summary, "Number of requests rejected: %d\n", length-accept);
-	fprintf(summary, "Number of time slots used: %d (%f%%)\n", slots_used, (100*(float)slots_used/(float)total_slots));
+	fprintf(summary, "Number of time slots used: %d\n", slots_used);
      /* Clear the remaining rejected events */
 	while (cur!=NULL) {
 		// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
+		fprintf(log_file, "%d %s %s %d-%d-%d", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100);
+		if (cur->type == 2 || cur->type == 3){
+            fprintf(log_file, " %d:00 %d    Rejected\n", cur->time, cur->duration);
+		}
+		else {
+			fprintf(log_file, " %d          Rejected\n", cur->duration);
+		}
 		cur = cur->next;
 	}
     return;
@@ -175,18 +182,38 @@ void PR_invoker(struct Event events[1000], int length, int period_start_date, in
     struct Event* head = NULL;
 	FILE *sch_result = fopen("./summary/PR_result", "w"), *log_file = fopen("./summary/PR_log_file", "w"), *summary = fopen("./summary/PR_summary", "w");
 	head = &events[1];
-	for (int i=1;i<=length;i++) {
-		if (i<length) {
+	for (int i = 1; i <= length; i++) {
+		if (i < length) {
 			events[i].next = &events[i+1];
-		} else {
+		}
+		else {
 			events[length].next = NULL;
 		}
 		events[i].rest_t = events[i].duration;
 	}
+	fprintf(log_file, "***Log File - Priority***\n");
+	fprintf(log_file, "ID Event                         Accepted/Rejected\n");
+	fprintf(log_file, "==================================================\n");
+	fprintf(summary, "***Summary Report***\n");
+	fprintf(summary, "\nAlgorithm used: Priority\n");
+	fprintf(summary, "\nThere are %d requests\n", length);
 	head = Sort_By_Priority(head, length);
 	Priority(head, period_start_date, period_end_date, period_start_time, period_end_time, length, sch_result, log_file, summary);
 	fprintf(log_file, "\n==================================================\n");
+	fprintf(log_file,"Errors (if any):\n");
+	for (i = 1; i <= length; i++) {
+		if (events[i].date < period_start_date || events[i].date > period_end_date) {
+			fprintf(log_file, "Event #%d contains an error\n", events[i].id);
+		} else {
+			if (events[i].type == 2 || events[i].type == 3) {
+				if (events[i].time < period_start_time || events[i].time >= period_end_time || events[i].duration > (period_end_time-events[i].time)) {
+					fprintf(log_file, "Event #%d contains an error\n", events[i].id);
+				}
+			}
+		}
+	}
     fclose(sch_result);
 	fclose(log_file);
 	fclose(summary);
+	return;
 }
