@@ -4,7 +4,7 @@
 #include <sys/wait.h> 
 #include <string.h>
 
-#include <parser.h>
+#include "parser.h"
 
 #define LINE_SIZE 50
 
@@ -108,9 +108,10 @@ void output(char *filename, char *algorithm) {
 	printf("\n");
 }
 
-
+/*
 int main() {
 	output("RR_result", "RR");
 	
 	return 0;
 }
+*/

@@ -68,6 +68,7 @@ void print_event();
 void create_scheduler(int option);
 int parse_level(char* name);
 bool is_digit(char a);
+void output(char *filename, char *algorithm);
 
 #include "ddl_fighter.h"
 #include "RR.h"
