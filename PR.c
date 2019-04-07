@@ -158,7 +158,7 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
     // We duplicate the linked list, or else the original will change
     if (length == 0 || length == 1 || head == NULL) return head;
     struct Event* current, *lastNode=NULL, *newHead;
-    for (int i = 0; i < 4; i++){
+    for (int i = 0; i < length; i++){
         current = head;
         for (int j = 0; j < length; j++){
             if (current->type == i){
