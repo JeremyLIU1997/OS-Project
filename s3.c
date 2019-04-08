@@ -67,6 +67,11 @@ int main(int argc, char *argv[]) {
 					// printf("run pr!\n");
 					create_scheduler(PR);
 					continue;
+				}
+				else if (strcmp(str,"run all\n") == 0) {
+					// printf("run pr!\n");
+					create_scheduler(ALL);
+					continue;
 				} 
 				else if (strcmp(str,"exitS3\n") == 0) {
 					printf("Parser Exited!\n");

@@ -331,7 +331,7 @@ void generate_summary() {
 	fprintf(summary, "\nNumber of requests: %d\n",event_counter);
 	fprintf(summary, "Number of rejected: %d, [ ", number_of_reject);
 	for (int i = 0; i < number_of_reject; ++i)
-		fprintf(summary, "%d ", rejected[i]);
+		fprintf(summary, "%d ", events[rejected[i]].id);
 	fprintf(summary, "]\n\n");
 
 	int hours_used = 0;

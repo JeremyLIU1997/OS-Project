@@ -10,6 +10,7 @@
 #define DDL_FIGHTER 0
 #define RR 1
 #define PR 2
+#define ALL 3
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -5,7 +5,6 @@
 
 // my headers
 #include "parser.h"
-#include "RR.h"
 // macros
 
 // prototypes
@@ -156,6 +155,11 @@ void create_scheduler(int option) {
 	else if (option == PR) {
         PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
         // output("./summary/PR_result","Priority");
+	}
+	else if (option == ALL) {
+		PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
+		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
+		fight_ddl();
 	}
 
 	wait(NULL);
