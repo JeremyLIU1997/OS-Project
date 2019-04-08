@@ -7,6 +7,8 @@ void cmdToChild(int fd_toC[][2], char *instr);
 void toChild(int fd_toC[][2], char *instr);
 void test(int fd_toC[][2], int i);//to be deleted
 char report_filename[100];
+void analyzer();
+float scoring(char *filename);
 
 /* global variable */
 int fd_toC[CHILD_NUM][2], fd_toP[CHILD_NUM][2];
@@ -61,6 +63,10 @@ int main(int argc, char *argv[]) {
 					create_scheduler(ALL);
 					continue;
 				} 
+				else if (strcmp(str, "analyze\n") == 0) {
+					analyzer();
+					continue;
+				}
 				else if (strcmp(str,"exitS3\n") == 0) {
 					printf("Parser Exited!\n");
 					exit(0);
@@ -137,6 +143,10 @@ void cmdToChild(int fd_toC[][2], char *instr) {
 		char *filename = (char*) malloc(strlen(instr)-9+1);
 		strcpy(filename, instr+9);
 		fp = fopen(filename, "r");
+		if (fp == NULL) {
+			printf("Cannot open the file!\n"); 
+			exit(1);
+		}
 
 		while(fscanf(fp, "%[^\n]\n", instr) != EOF) {
 		//while( fgets (instr, BUF_SIZE, fp) != NULL ) {

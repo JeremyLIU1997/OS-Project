@@ -19,5 +19,12 @@ extern int fd_toP[CHILD_NUM][2];
 #include "parser.h"
 #include "s3.h"
 
+void getInput(char *instr);
+void cmdToChild(int fd_toC[][2], char *instr);
+void toChild(int fd_toC[][2], char *instr);
+void test(int fd_toC[][2], int i);//to be deleted
+char report_filename[100];
+void analyzer();
+float scoring(char *filename);
 
 #endif
