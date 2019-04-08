@@ -10,14 +10,8 @@
 #define DDL_FIGHTER 0
 #define RR 1
 #define PR 2
+#define ALL 3
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <stdbool.h>
-#include <sys/wait.h>
-#include <string.h>
 
 /*
 Project base point: 30
@@ -62,6 +56,17 @@ extern int period_start_time;
 extern int period_end_time;
 extern char report_filename[100];
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <stdbool.h>
+#include <sys/wait.h>
+#include <string.h>
+#include "ddl_fighter.h"
+#include "RR.h"
+#include "PR.h"
+
 // prototypes
 void parse();
 void print_event();
@@ -69,9 +74,5 @@ void create_scheduler(int option);
 int parse_level(char* name);
 bool is_digit(char a);
 void output(char *summary_file, char *algorithm, char *timetable_file);
-
-#include "ddl_fighter.h"
-#include "RR.h"
-#include "PR.h"
 
 #endif
