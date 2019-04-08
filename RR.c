@@ -24,7 +24,7 @@ int print_slots_alloc(struct Event* head, int cur_time, int slots_elapsed, int s
 		if (temp%100>=end_time) { // deal with overflow
 			temp = (temp/100 + 1)*100 + start_time;
 		}
-		fprintf(sch_result, "%d %d %d %s %d\n", temp/100, temp%100, head->id, head->name, head->type);
+		fprintf(sch_result, "%d %d %d %s %d %d\n", temp/100, temp%100, head->id, head->name, head->type, head->duration);
 		temp++;
 	}
 	return temp;
