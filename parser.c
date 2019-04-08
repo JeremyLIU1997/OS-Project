@@ -5,6 +5,7 @@
 
 // my headers
 #include "parser.h"
+#include "RR.h"
 // macros
 
 // prototypes
@@ -146,23 +147,17 @@ void create_scheduler(int option) {
 
 	if (option == DDL_FIGHTER) {
 		fight_ddl();
-		// output("./summary/ddl_fighter_result","Deadline Fighter Algorithm");
+		output("./summary/ddl_fighter_result","Deadline Fighter Algorithm","./timetable/ddl_fighter_timetable");
 	}
 	else if (option == RR) {
 		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
-		// output("./summary/RR_result","Round Robin");
+		output("./summary/RR_result","Round Robin","./timetable/RR_timetable");
 	}
 	else if (option == PR) {
         PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
-        // output("./summary/PR_result","Priority");
-	}
-	else if (option == ALL) {
-		PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
-		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
-		fight_ddl();
+        output("./summary/PR_result","Priority","./timetable/PR_timetable");
 	}
 
 	wait(NULL);
-
 }
 
