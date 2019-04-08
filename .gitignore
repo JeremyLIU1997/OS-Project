@@ -3,6 +3,6 @@
 *.pdf
 
 *.out
-*.exe
+*.exe*
 
 /summary/
