@@ -24,7 +24,7 @@ int print_slots_alloc(struct Event* head, int cur_time, int slots_elapsed, int s
 		if (temp%100>=end_time) { // deal with overflow
 			temp = (temp/100 + 1)*100 + start_time;
 		}
-		fprintf(sch_result, "%d %d %d %s %d %.2f \n", temp/100, temp%100, head->id, head->name, head->type, head->percent);
+		fprintf(sch_result, "%d %d %d %s %d\n", temp/100, temp%100, head->id, head->name, head->type);
 		temp++;
 	}
 	return temp;
@@ -45,13 +45,13 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 					cur_time = print_slots_alloc(head, cur_time, head->duration, start_time, end_time, sch_result);
 					accepted_events++;
 					total_slots = total_slots + head->duration;
-					fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+					fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Accepted 100.0%%\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
 				} else{ // the rest of the day is not sufficient of the Event, Reject
-					fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+					fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected 0.0%%\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
 				}
 				situation = 1;
 			} else if (cur_time > head->date*100 + head->time) { // the right time has passed, Reject
-				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
+				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    Rejected 0.0%%\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->time, head->duration);
 				situation = 1;
 			} else { // the right time is in the future, return the Event back to the queue for the future
 				if (pro_ass_count==0) { // only Revisions and Activities are left in the queue
@@ -82,11 +82,11 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 				accepted_events++;
 				pro_ass_count--;
 				total_slots = total_slots + slots_elapsed;
-				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration);
+				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted %.1f%%\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration, head->percent*100);
 				situation = 1;
 			} else if (head->rest_t>0) { // the Event consumes the allocated quantum and the quantum is within the deadline, but the Event has not been completed yet
 				cur_time = print_slots_alloc(head, cur_time-q, q, start_time, end_time, sch_result);
-				total_slots = total_slots + slots_elapsed;
+				total_slots = total_slots + q;
 				head->percent = head->percent + (float)q/head->duration;
 				tail->next = head;
 				tail = tail->next;
@@ -97,7 +97,7 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 				accepted_events++;
 				pro_ass_count--;
 				total_slots = total_slots + q + head->rest_t;
-				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration);
+				fprintf(log_file, "%d %s %s %d-%d-%d %d          Accepted 100.0%%\n", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100, head->duration);
 				situation = 1;
 			}
 		}	
@@ -120,9 +120,14 @@ void Round_Robin(int q, struct Event* head, struct Event* tail, int start_date, 
 	while (head!=NULL) {
 		fprintf(log_file, "%d %s %s %d-%d-%d", head->id, operations[head->type], head->name, head->date/10000, (head->date/100)%100, head->date%100);
 		if (head->type==2 || head->type==3) {
-			fprintf(log_file, " %d:00 %d    Rejected\n", head->time, head->duration);
+			fprintf(log_file, " %d:00 %d    Rejected 0.0%%\n", head->time, head->duration);
 		} else {
-			fprintf(log_file, " %d          Rejected\n", head->duration);
+			if (head->percent>0) {
+				accepted_events++;
+				fprintf(log_file, " %d          Accepted %.1f%%\n", head->duration, head->percent*100);
+			} else {
+				fprintf(log_file, " %d          Rejected 0.0%%\n", head->duration);
+			}
 		}
 
 		head = head->next;
@@ -163,14 +168,13 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	Round_Robin(q, head, tail, period_start_date, period_end_date, period_start_time, period_end_time, sch_result, log_file, summary, event_counter, pro_ass_count);
 	
 	fprintf(log_file, "\n==================================================\n");
-	fprintf(log_file,"Errors (if any):\n");
 	for (i=1;i<=event_counter;i++) {
 		if (events[i].date<period_start_date || events[i].date>period_end_date) {
-			fprintf(log_file, "Event #%d contains an error\n", events[i].id);
+			fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
 		} else {
 			if (events[i].type==2 || events[i].type==3) {
 				if (events[i].time<period_start_time || events[i].time>=period_end_time || events[i].duration>(period_end_time-events[i].time)) {
-					fprintf(log_file, "Event #%d contains an error\n", events[i].id);
+					fprintf(log_file, "Event (id:%d, name:%s, type:%d) has an error\n", events[i].id, events[i].name, events[i].type);
 				}
 			}
 		}
