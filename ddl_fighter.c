@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <math.h>
 
 // my headers
 #include "ddl_fighter.h"
@@ -294,6 +295,8 @@ void generate_log() {
 	for (int i = 1; i <= event_counter; ++i) {
 		strcpy(temp,command[events[i].id]);
 		temp[strlen(temp)-1] = 0;
+		if (events[i].rest_t < 0)
+			events[i].rest_t = 0;
 		fprintf(log, "%d\t%s\t\t\t%s\t%0.1f%%\n",events[i].id,temp,dict[events[i].status],(events[i].duration - events[i].rest_t) * 100 / (float)(events[i].duration));
 	}
 	fprintf(log, "\n===============================================================\n");
