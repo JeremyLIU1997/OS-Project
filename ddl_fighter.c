@@ -319,7 +319,7 @@ void generate_intermediate_timetable() {
 		current_time = (current_time+1) % HOUR_PER_DAY;
 		int index = schedule[i];
 		if (index == 0) continue;
-		fprintf(file, "%d %d %d %s %d\n", current_date, DAY_START + current_time,events[index].id,events[index].name,events[index].type);
+		fprintf(file, "%d %d %d %s %d %d\n", current_date, DAY_START + current_time,events[index].id,events[index].name,events[index].type,events[index].duration);
 	}
 	fclose(file);
 }
