@@ -180,6 +180,7 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
             if (current->type == i){
                 struct Event *newNode = (struct Event *)malloc(sizeof(struct Event));
                 memcpy(newNode, current, sizeof(struct Event));
+                newNode->next = NULL;
                 if (lastNode != NULL){
                     lastNode->next = newNode;
                 }
