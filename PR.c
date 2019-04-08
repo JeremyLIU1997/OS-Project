@@ -49,7 +49,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                         fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    ACCEPTED 100.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
                         accept++;
                         for (int i = 0; i < cur->duration; i++){
-                            fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                            fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
                             cur_time++;
                         }
                     }
@@ -83,7 +83,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     // the Event has been completed
                     slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
                     for (int i = 0; i < cur->duration; i++){
-                        fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                        fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
                         cur_time++;
                         if (cur_time%100 >= end_time){
                             cur_time += 100;
@@ -109,7 +109,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     accept++;
                     //cur_time = cur->date * 100 + 100 + start_time;
                     for (int i = 0; i < time_to_ddl; i++){
-                        fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                        fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
                         cur_time++;
                         if (cur_time%100 >= end_time){
                             cur_time += 100;
@@ -130,7 +130,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                 // printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
                 fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
                 for (int i = 0; i < rem_time; i++){
-                    fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                    fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
                     cur_time++;
                     if (cur_time%100 >= end_time){
                         cur_time += 100;
