@@ -22,15 +22,14 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
     while (cur_time<(end_date*100+end_time) && cur!=NULL){
         /* Revision or Activity */
         if (cur->type == 2 || cur->type == 3){
-            if (cur_time <= cur->date*100 + cur->time) { // it's the right date and time
+            //if (cur_time <= cur->date*100 + cur->time) { // the date and time > current time
                 if (cur->time + cur->duration > end_time || cur->date > end_date) { // the Revision or Activity can not be finished in one go at the current day
 					// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
+                    fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 				}
 				else {
                     int ifreject = 0;
-                    int cur_date = cur_time/100;
-                    slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
+                    slot = cur->time - start_time + 4 * (cur->date - start_date);
                     for (int i = slot; i < slot+cur->duration; i++){
                         if (slots[i] == 1){
                             ifreject = 1;
@@ -38,28 +37,28 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     }
                     if (ifreject == 1){
                         // printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
                     }
                     else{
-                        int cur_date = cur_time/100;
-                        slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
-                        cur_time = cur_time + cur->duration;
+                        cur_time = cur->date * 100 + cur->time;
+                        slot = cur->time - start_time + 4 * (cur->date - start_date);
                         for (int i = slot; i < slot+cur->duration; i++){
                             slots[i] = 1;
                         }
                         // printf("Event (id: %d, name: %s, type: %d) has been accepted\n", cur->id, cur->name, cur->type);
-                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    ACCEPTED 100.0%%\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    ACCEPTED 100.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
                         accept++;
                         for (int i = 0; i < cur->duration; i++){
                             fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                            cur_time++;
                         }
                     }
                 }
-            }
+            /*}
             else {
 				// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
-				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
-			}
+				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
+			}*/
 			if (cur->next == NULL) {
                 cur = NULL;
                 break;
@@ -85,27 +84,37 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
                     slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
                     for (int i = 0; i < cur->duration; i++){
                         fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                        cur_time++;
+                        if (cur_time%100 >= end_time){
+                            cur_time += 100;
+                            cur_time = cur_time/100 * 100 + start_time;
+                        }
                     }
-                    cur_time += cur->duration;
+                    //cur_time += cur->duration;
 
                     for (int i = slot; i < slot+cur->duration; i++){
                         slots[i] = 1;
                     }
-                    int overflow = (cur_time % cur_date) - end_time;
+                    /*int overflow = (cur_time % cur_date) - end_time;
                     if (overflow > 0){
                         int day_spent = overflow / (end_time - start_time);
                         int remainder = overflow % (end_time - start_time);
                         cur_time = (cur_date + 1 + day_spent) * 100 + start_time + remainder;
-                    }
+                    }*/
                 }
                 else { // it fails to finish before the ddl
                     cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
                     // printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
                     accept++;
-                    cur_time = cur->date * 100 + 100 + start_time;
+                    //cur_time = cur->date * 100 + 100 + start_time;
                     for (int i = 0; i < time_to_ddl; i++){
                         fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                        cur_time++;
+                        if (cur_time%100 >= end_time){
+                            cur_time += 100;
+                            cur_time = cur_time/100 * 100 + start_time;
+                        }
                     }
                 }
                 if (cur->next==NULL) { // the Event is the last one
@@ -117,11 +126,16 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
             }
 			else
 			{ // it fails to finish before end date
-                cur->percent = (float)(cur->duration - rem_time)/(float)cur->duration * 100;
+                cur->percent = (float)rem_time/(float)cur->duration * 100;
                 // printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
                 fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
                 for (int i = 0; i < rem_time; i++){
                     fprintf(sch_result, "%d %d %d %s %d \n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type);
+                    cur_time++;
+                    if (cur_time%100 >= end_time){
+                        cur_time += 100;
+                        cur_time = cur_time/100 * 100 + start_time;
+                    }
                 }
                 accept++;
                 slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
