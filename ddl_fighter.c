@@ -294,7 +294,7 @@ void generate_log() {
 	for (int i = 1; i <= event_counter; ++i) {
 		strcpy(temp,command[events[i].id]);
 		temp[strlen(temp)-1] = 0;
-		fprintf(log, "%d\t%s\t\t\t%s\n",events[i].id,temp,dict[events[i].status]);
+		fprintf(log, "%d\t%s\t\t\t%s\t%0.1f%%\n",events[i].id,temp,dict[events[i].status],(events[i].duration - events[i].rest_t) * 100 / (float)(events[i].duration));
 	}
 	fprintf(log, "\n===============================================================\n");
 	fprintf(log,"Errors (if any):\n");

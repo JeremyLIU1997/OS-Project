@@ -203,6 +203,7 @@ void PR_invoker(struct Event events[1000], int length, int period_start_date, in
 	Priority(head, period_start_date, period_end_date, period_start_time, period_end_time, length, sch_result, log_file, summary);
 	fprintf(log_file, "\n======================================================\n");
 	fprintf(log_file,"Errors (if any):\n");
+    int i;
 	for (i = 1; i <= length; i++) {
 		if (events[i].date < period_start_date || events[i].date > period_end_date) {
 			fprintf(log_file, "Event #%d contains an error\n", events[i].id);
