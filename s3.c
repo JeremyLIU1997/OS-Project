@@ -54,22 +54,18 @@ int main(int argc, char *argv[]) {
 					parse();
 				}
 				if (strcmp(str,"run ddl\n") == 0) {
-					// printf("Fighting Deadlines !!!\n");
 					create_scheduler(DDL_FIGHTER);
 					continue;
 				}
 				else if (strcmp(str,"run rr\n") == 0) {
-					// printf("run rr!\n");
 					create_scheduler(RR);
 					continue;
 				}
 				else if (strcmp(str,"run pr\n") == 0) {
-					// printf("run pr!\n");
 					create_scheduler(PR);
 					continue;
 				}
 				else if (strcmp(str,"run all\n") == 0) {
-					// printf("run pr!\n");
 					create_scheduler(ALL);
 					continue;
 				} 
@@ -85,9 +81,6 @@ int main(int argc, char *argv[]) {
 
 			// just for testing: 
 			//test(fd_toC, i);//to be deleted
-
-
-
 
 			close(fd_toC[i][0]);
 			close(fd_toP[i][1]);
