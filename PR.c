@@ -23,7 +23,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
         /* Revision or Activity */
         if (cur->type == 2 || cur->type == 3){
             if (cur_time <= cur->date*100 + cur->time) { // it's the right date and time
-                if (cur->date*100 + end_time - cur_time < cur->duration) { // the Revision or Activity can not be finished in one go at the current day
+                if (cur->time + cur->duration > end_time || cur->date > end_date) { // the Revision or Activity can not be finished in one go at the current day
 					// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[head->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 				}
@@ -160,7 +160,7 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
     // We duplicate the linked list, or else the original will change
     if (length == 0 || length == 1 || head == NULL) return head;
     struct Event* current, *lastNode=NULL, *newHead;
-    for (int i = 0; i < length; i++){
+    for (int i = 0; i < 4; i++){
         current = head;
         for (int j = 0; j < length; j++){
             if (current->type == i){
