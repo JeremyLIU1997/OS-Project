@@ -1,6 +1,9 @@
 
 # To compile (on Apollo):
-gcc -std=c99 s3.c parser.c RR.c PR.c ddl_fighter.c output.c
+gcc -std=c99 *.c
+
+# To run (after compilation):
+./a.out
 
 # Group number: 01
 
