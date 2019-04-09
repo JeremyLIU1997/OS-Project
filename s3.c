@@ -1,4 +1,3 @@
-
 #include "s3.h"
 
 /* prototype */
@@ -74,11 +73,6 @@ int main(int argc, char *argv[]) {
 				/* Increment event_counter only if NOT run command */
 				strcpy(command[event_counter++],str);
 			}
-			
-			/* call schedulers... */
-
-			// just for testing: 
-			//test(fd_toC, i);//to be deleted
 
 			close(fd_toC[i][0]);
 			close(fd_toP[i][1]);
@@ -96,12 +90,8 @@ int main(int argc, char *argv[]) {
 
 		while (1) {
 			getInput(instr);
-			
 			cmdToChild(fd_toC, instr);
-
 			if (strcmp(instr, "exitS3") == 0) break;
-
-
 		}
 
 		printf("Bye-bye!\n");
@@ -161,10 +151,8 @@ void cmdToChild(int fd_toC[][2], char *instr) {
 
 /* toChild function: pass a command to all children */
 void toChild(int fd_toC[][2], char *instr) {
-	for (int i = 0; i < CHILD_NUM; i++) {
+	for (int i = 0; i < CHILD_NUM; i++)
 		write(fd_toC[i][1], instr, strlen(instr));
-	}
-	//printf("<Parent> message passed to all child\n");//to be deleted
 }
 
 
