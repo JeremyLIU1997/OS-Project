@@ -23,7 +23,7 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
         /* Revision or Activity */
         if (cur->type == 2 || cur->type == 3){
             //if (cur_time <= cur->date*100 + cur->time) { // the date and time > current time
-                if (cur->time + cur->duration > end_time || cur->date > end_date) { // the Revision or Activity can not be finished in one go at the current day
+                if (cur->time + cur->duration > end_time || cur->date > end_date || cur->date < start_date) { // the Revision or Activity can not be finished in one go at the current day
 					// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
                     fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 				}
@@ -59,13 +59,6 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
 				// printf("Event (id: %d, name: %s, type: %d) has been rejected\n", cur->id, cur->name, cur->type);
 				fprintf(log_file, "%d %s %s %d-%d-%d %d:00 %d    REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->time, cur->duration);
 			}*/
-			if (cur->next == NULL) {
-                cur = NULL;
-                break;
-			}
-			else {
-			    cur = cur->next;
-			}
         }
         else {
             // See if the remaining time is enough for it
@@ -74,79 +67,79 @@ void Priority(struct Event* head, int start_date, int end_date, int start_time, 
             int today_end = cur_date*100 + 23;
             int rem_time = rem_date*(end_time - start_time) + today_end - cur_time;
             int time_to_ddl = (cur->date - cur_date)*(end_time - start_time) + today_end - cur_time;
-            if (rem_time >= cur->rest_t){
-                if (time_to_ddl >= cur->rest_t) {
-                    //cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
-                    // printf("Event (id: %d, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED 100.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
-                    accept++;
-                    // the Event has been completed
-                    slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
-                    for (int i = 0; i < cur->duration; i++){
-                        fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
-                        cur_time++;
-                        if (cur_time%100 >= end_time){
-                            cur_time += 100;
-                            cur_time = cur_time/100 * 100 + start_time;
-                        }
-                    }
-                    //cur_time += cur->duration;
-
-                    for (int i = slot; i < slot+cur->duration; i++){
-                        slots[i] = 1;
-                    }
-                    /*int overflow = (cur_time % cur_date) - end_time;
-                    if (overflow > 0){
-                        int day_spent = overflow / (end_time - start_time);
-                        int remainder = overflow % (end_time - start_time);
-                        cur_time = (cur_date + 1 + day_spent) * 100 + start_time + remainder;
-                    }*/
-                }
-                else { // it fails to finish before the ddl
-                    cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
-                    // printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
-                    fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
-                    accept++;
-                    //cur_time = cur->date * 100 + 100 + start_time;
-                    for (int i = 0; i < time_to_ddl; i++){
-                        fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
-                        cur_time++;
-                        if (cur_time%100 >= end_time){
-                            cur_time += 100;
-                            cur_time = cur_time/100 * 100 + start_time;
-                        }
-                    }
-                }
-                if (cur->next==NULL) { // the Event is the last one
-					cur = NULL;
-					break;
-				} else {
-					cur = cur->next;
-				}
+            if (cur->date < cur_date) {
+                fprintf(log_file, "%d %s %s %d-%d-%d %d          REJECTED 0.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
             }
-			else
-			{ // it fails to finish before end date
-                cur->percent = (float)rem_time/(float)cur->duration * 100;
-                // printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
-                fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
-                for (int i = 0; i < rem_time; i++){
-                    fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
-                    cur_time++;
-                    if (cur_time%100 >= end_time){
-                        cur_time += 100;
-                        cur_time = cur_time/100 * 100 + start_time;
+            else {
+                if (rem_time >= cur->duration){
+                    if (time_to_ddl >= cur->duration) {
+                        //cur_time = cur_time + 100*(cur->rest_t/(end_time-start_time)) + (start_time + cur->rest_t%(end_time-start_time));
+                        // printf("Event (id: %d, name: %s, type: %d) has been accepted and has completed\n", cur->id, cur->name, cur->type);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED 100.0%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration);
+                        accept++;
+                        // the Event has been completed
+                        slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
+                        for (int i = 0; i < cur->duration; i++){
+                            fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
+                            cur_time++;
+                            if (cur_time%100 >= end_time){
+                                cur_time += 100;
+                                cur_time = cur_time/100 * 100 + start_time;
+                            }
+                        }
+                        //cur_time += cur->duration;
+
+                        for (int i = slot; i < slot+cur->duration; i++){
+                            slots[i] = 1;
+                        }
+                        /*int overflow = (cur_time % cur_date) - end_time;
+                        if (overflow > 0){
+                            int day_spent = overflow / (end_time - start_time);
+                            int remainder = overflow % (end_time - start_time);
+                            cur_time = (cur_date + 1 + day_spent) * 100 + start_time + remainder;
+                        }*/
+                    }
+                    else { // it fails to finish before the ddl
+                        cur->percent = (float)time_to_ddl/(float)cur->duration * 100;
+                        // printf("Event (id: %d, name: %s, type: %d) has been accepted and only finished %f%%\n", cur->id, cur->name, cur->type, cur->percent);
+                        fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
+                        accept++;
+                        //cur_time = cur->date * 100 + 100 + start_time;
+                        for (int i = 0; i < time_to_ddl; i++){
+                            fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
+                            cur_time++;
+                            if (cur_time%100 >= end_time){
+                                cur_time += 100;
+                                cur_time = cur_time/100 * 100 + start_time;
+                            }
+                        }
                     }
                 }
-                accept++;
-                slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
-				if (cur->next==NULL) { // the Event is the last one
-					cur = NULL;
-					break;
-				} else {
-					cur = cur->next;
-				}
-			}
+                else
+                { // it fails to finish before end date
+                    cur->percent = (float)rem_time/(float)cur->duration * 100;
+                    // printf("Event (id: %d, name: %s, type: %d) has been accepted but has not completed\n", cur->id, cur->name, cur->type);
+                    fprintf(log_file, "%d %s %s %d-%d-%d %d          ACCEPTED %.1f%%\n", cur->id, operations[cur->type], cur->name, cur->date/10000, (cur->date/100)%100, cur->date%100, cur->duration, cur->percent);
+                    for (int i = 0; i < rem_time; i++){
+                        fprintf(sch_result, "%d %d %d %s %d %d\n", cur_time/100, cur_time%100, cur->id, cur->name, cur->type, cur->duration);
+                        cur_time++;
+                        if (cur_time%100 >= end_time){
+                            cur_time += 100;
+                            cur_time = cur_time/100 * 100 + start_time;
+                        }
+                    }
+                    accept++;
+                    slot = cur_time % cur_date - start_time + 4 * (cur_date - start_date);
+                }
+            }
 		}
+        if (cur->next == NULL) {
+            cur = NULL;
+            break;
+        }
+        else {
+            cur = cur->next;
+        }
     }
     int slots_used = 0;
     for (int i = 0; i < total_slots; i++){
@@ -235,3 +228,4 @@ void PR_invoker(struct Event events[1000], int length, int period_start_date, in
 	fclose(summary);
 	return;
 }
+
