@@ -10,10 +10,10 @@ float scoring(char *filename);
 
 
 void analyzer() {
-	char *pr_filename = "./summary/PR_result";
-	char *rr_filename = "./summary/RR_result";
-	char *ddl_filename = "./summary/ddl_fighter_result";
-	FILE *fp = fopen("./summary/analyzer_summary", "w");
+	char *pr_filename = "./output/PR_result";
+	char *rr_filename = "./output/RR_result";
+	char *ddl_filename = "./output/ddl_fighter_result";
+	FILE *fp = fopen("./output/analyzer_summary", "w");
 	
 	float pr_benefit = scoring(pr_filename);
 	float rr_benefit = scoring(rr_filename);

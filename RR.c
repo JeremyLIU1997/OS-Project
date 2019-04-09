@@ -142,7 +142,7 @@ void RR_invoker(struct Event events[1000], int event_counter, int q, int period_
 	struct Event* head = NULL;
 	struct Event* tail = NULL;
 	int i = 0, pro_ass_count = 0;
-	FILE *sch_result = fopen("./summary/RR_result", "w"), *log_file = fopen("./summary/RR_log_file", "w"), *summary = fopen("./summary/RR_summary", "w");
+	FILE *sch_result = fopen("./output/RR_result", "w"), *log_file = fopen("./output/S3_RR.log", "w"), *summary = fopen("./output/S3_report_RR.dat", "w");
 
 	head = &events[1];
 	for (i=1;i<=event_counter;i++) {

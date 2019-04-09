@@ -49,7 +49,7 @@ struct Event {
 // shared variables
 extern struct Event events[1000]; // support at most 1000 events
 extern int event_counter;
-extern char command[1000][100];
+extern char command[1000][200];
 extern int period_start_date;
 extern int period_end_date;
 extern int period_start_time;

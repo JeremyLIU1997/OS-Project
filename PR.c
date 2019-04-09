@@ -197,7 +197,7 @@ struct Event * Sort_By_Priority(struct Event* head, int length){
 
 void PR_invoker(struct Event events[1000], int length, int period_start_date, int period_end_date, int period_start_time, int period_end_time){
     struct Event* head = NULL;
-	FILE *sch_result = fopen("./summary/PR_result", "w"), *log_file = fopen("./summary/PR_log_file", "w"), *summary = fopen("./summary/PR_summary", "w");
+	FILE *sch_result = fopen("./output/PR_result", "w"), *log_file = fopen("./output/S3_PR.log", "w"), *summary = fopen("./output/S3_report_PR.dat", "w");
 	head = &events[1];
 	for (int i = 1; i <= length; i++) {
 		if (i < length) {
