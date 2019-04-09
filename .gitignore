@@ -5,6 +5,6 @@
 *.out
 *.exe*
 
-/summary/
+/output/
 
 /timetable/
