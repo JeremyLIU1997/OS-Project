@@ -147,23 +147,23 @@ void create_scheduler(int option) {
 
 	if (option == DDL_FIGHTER) {
 		fight_ddl();
-		output("./output/ddl_fighter_result","Deadline Fighter Algorithm","./output/ddl_fighter_timetable");
+		output("./output/ddl_fighter_result","Deadline Fighter Algorithm","./output/ddl_fighter_timetable.txt");
 	}
 	else if (option == RR) {
 		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
-		output("./output/RR_result","Round Robin","./output/RR_timetable");
+		output("./output/RR_result","Round Robin","./output/RR_timetable.txt");
 	}
 	else if (option == PR) {
         PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
-        output("./output/PR_result","Priority","./output/PR_timetable");
+        output("./output/PR_result","Priority","./output/PR_timetable.txt");
 	}
 	else if (option == ALL) {
 		RR_invoker(events, event_counter, 1, period_start_date, period_end_date, period_start_time, period_end_time);
-		output("./output/RR_result","Round Robin","./output/RR_timetable");
+		output("./output/RR_result","Round Robin","./output/RR_timetable.txt");
 		PR_invoker(events, event_counter, period_start_date, period_end_date, period_start_time, period_end_time);
-        output("./output/PR_result","Priority","./output/PR_timetable");
+        output("./output/PR_result","Priority","./output/PR_timetable.txt");
 		fight_ddl();
-		output("./output/ddl_fighter_result","Deadline Fighter Algorithm","./output/ddl_fighter_timetable");
+		output("./output/ddl_fighter_result","Deadline Fighter Algorithm","./output/ddl_fighter_timetable.txt");
 	}
 
 
